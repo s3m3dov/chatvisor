@@ -6,6 +6,6 @@ Smart Bot with lots of abilities.
 - LangChain
 - OpenAI
 - Vectorstore DB
-- Convenyional DB
+- Conventional DB
 - python-telegram-bot
 - Stripe

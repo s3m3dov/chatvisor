@@ -6,5 +6,6 @@ Smart Bot with lots of abilities.
 - LangChain library
 - OpenAI API
 - Vectorstore DB
+- Convenyional DB
 - python-telegram-bot
 - Stripe

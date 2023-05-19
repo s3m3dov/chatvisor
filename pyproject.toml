@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "smartbot"
+version = "0.1.0"
+description = "Smart Bot with lots of abilities."
+authors = ["Hikmat Samadov <s3m3dov@hotmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+python-dotenv = "^1.0.0"
+requests = "^2.30.0"
+python-telegram-bot = "^20.3"
+stripe = "^5.4.0"
+pendulum = "^2.1.2"
+numpy = "^1.24.3"
+pandas = "^2.0.1"
+langchain = "^0.0.173"
+openai = "^0.27.6"
+tiktoken = "^0.4.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

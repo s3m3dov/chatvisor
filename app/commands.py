@@ -19,6 +19,7 @@ async def ask_gpt3_5_turbo(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         await update.message.reply_text("You need to ask a question in the format `/gpt3_5_turbo <question>`")
         return
 
+    await update.message.reply_text("Thinking...")
     question = " ".join(context.args)
     bot = ChatBot(llm=gpt3_5_turbo)
     response = bot.predict(
@@ -33,6 +34,7 @@ async def ask_gpt4(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text("You need to ask a question in the format `/gpt4 <question>`")
         return
 
+    await update.message.reply_text("Thinking...")
     question = " ".join(context.args)
     bot = ChatBot(llm=gpt4)
     response = bot.predict(

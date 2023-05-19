@@ -6,7 +6,7 @@ authors = ["Hikmat Samadov <s3m3dov@hotmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.11"
 python-dotenv = "^1.0.0"
 requests = "^2.30.0"
 python-telegram-bot = "^20.3"

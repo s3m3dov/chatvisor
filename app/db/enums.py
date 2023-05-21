@@ -3,6 +3,11 @@ from enum import IntEnum
 
 class Platform(IntEnum):
     telegram = 1
+    discord = 2
+
+    @classmethod
+    def values(cls) -> tuple:
+        return tuple(map(lambda c: c.value, cls))
 
 
 class SystemUser(IntEnum):

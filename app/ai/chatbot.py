@@ -2,7 +2,7 @@ from langchain import LLMChain
 from langchain.base_language import BaseLanguageModel
 from langchain.prompts.prompt import PromptTemplate
 
-from .constants import TEMPLATE
+from app.ai.constants import TEMPLATE
 
 
 class ChatBot:

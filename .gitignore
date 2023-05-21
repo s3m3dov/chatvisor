@@ -175,7 +175,6 @@ coverage.xml
 local_settings.py
 
 # DB stuff:
-db*
 db.sqlite3
 db.sqlite3-journal
 .chroma/

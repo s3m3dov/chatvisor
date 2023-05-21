@@ -1,8 +1,8 @@
 from telegram import Update, BotCommand
 from telegram.ext import ContextTypes, CommandHandler
 
-from app.chatbot import ChatBot
-from app.llms import gpt4, gpt3_5_turbo
+from app.ai.chatbot import ChatBot
+from app.ai.llms import gpt4, gpt3_5_turbo
 
 
 async def hello(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

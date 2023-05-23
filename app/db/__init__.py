@@ -1,7 +1,7 @@
 from sqlmodel import create_engine
 
 from app.core.config import settings
-from .models import (
+from .models_old import (
     Message,
     User,
     UserChannel,

@@ -1,20 +1,20 @@
-from enum import IntEnum
+from enum import Enum, StrEnum
 
 
-class Platform(IntEnum):
-    telegram = 1
-    discord = 2
+class BaseEnum(Enum):
 
     @classmethod
     def values(cls) -> tuple:
         return tuple(map(lambda c: c.value, cls))
 
 
-class SystemUser(IntEnum):
-    system = 1
-    gpt_3_5 = 2
-    gpt_4 = 3
-    dall_e = 4
+class Platform(StrEnum, BaseEnum):
+    TELEGRAM = "telegram"
+    discord = "discord"
 
-    def __str__(self) -> str:
-        return self.name.replace("_", " ").title()
+
+class SystemUser(StrEnum, BaseEnum):
+    SYSTEM = "system"
+    GPT_3_5 = "gpt-3.5 turbo"
+    GPT_4 = "gpt-4"
+    DALL_E = "dall-e"

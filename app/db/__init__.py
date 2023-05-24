@@ -1,8 +1,9 @@
-from sqlmodel import create_engine
+from sqlalchemy import create_engine
 
 from app.core.config import settings
-from .models_old import (
-    Message,
+from .models import (
+    PromptMessage,
+    OutputMessage,
     User,
     UserChannel,
 )

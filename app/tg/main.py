@@ -1,7 +1,7 @@
 from telegram.ext import ApplicationBuilder, Application
 
 from app.core.config import settings
-from app.tg.commands import command_handlers, command_info
+from app.tg import command_handlers, command_info
 
 log = print
 

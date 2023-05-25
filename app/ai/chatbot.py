@@ -22,5 +22,5 @@ class ChatBot:
             verbose=True,
         )
 
-    def predict(self, *args, **kwargs):
+    def predict(self, *args, **kwargs) -> str:
         return self.engine.predict(*args, **kwargs)

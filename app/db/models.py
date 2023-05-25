@@ -1,6 +1,5 @@
 from typing import Optional, List
 
-from pgvector.sqlalchemy import Vector
 from sqlalchemy import (Integer, String, JSON, ForeignKey)
 from sqlalchemy.orm import (
     DeclarativeBase,
@@ -25,17 +24,14 @@ class User(Base):
     last_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     channels: Mapped[List["UserChannel"]] = relationship(back_populates="user")
+    prompts: Mapped[List["PromptMessage"]] = relationship(back_populates="sender")
 
-    @property
-    def full_name(self) -> str:
+    def __str__(self) -> str:
         return (
             " ".join([self.first_name, self.last_name])
             if self.last_name
             else self.first_name
         )
-
-    def __str__(self) -> str:
-        return self.full_name
 
 
 class UserChannel(Base):
@@ -48,7 +44,8 @@ class UserChannel(Base):
 
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey(User.id), nullable=False)
 
-    user: Mapped["User"] = relationship(back_populates="user_channels")
+    user: Mapped["User"] = relationship(back_populates="channels")
+    prompts: Mapped[List["PromptMessage"]] = relationship(back_populates="channel")
 
     def __str__(self) -> str:
         return f"{self.platform.name}: {self.platform_chat_id}"
@@ -59,13 +56,13 @@ class PromptMessage(Base):
 
     id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
     text: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    # text_embedding: Mapped[Optional[Vector]] = mapped_column(Vector, nullable=True)
+    # embedding: Mapped[Optional[Vector]] = mapped_column(Vector, nullable=True)
 
     channel_id: Mapped[int] = mapped_column(Integer, ForeignKey(UserChannel.id), nullable=False)
     sender_id: Mapped[int] = mapped_column(Integer, ForeignKey(User.id), nullable=False)
 
-    channel: Mapped["UserChannel"] = relationship(back_populates="messages")
-    sender: Mapped["User"] = relationship(back_populates="messages")
+    channel: Mapped["UserChannel"] = relationship(back_populates="prompts")
+    sender: Mapped["User"] = relationship(back_populates="prompts")
     output: Mapped["OutputMessage"] = relationship(back_populates="prompt")
 
 
@@ -74,7 +71,7 @@ class OutputMessage(Base):
 
     id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
     text: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    # text_embedding: Mapped[Optional[Vector]] = mapped_column(Vector, nullable=True)
+    # embedding: Mapped[Optional[Vector]] = mapped_column(Vector, nullable=True)
 
     sender_id: Mapped[SystemUser] = mapped_column(saEnum(SystemUser, name="system_user"), nullable=False)
     prompt_id: Mapped[int] = mapped_column(Integer, ForeignKey(PromptMessage.id), nullable=False)

@@ -29,7 +29,7 @@ def upgrade() -> None:
     )
     op.create_table('users_channels',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('platform', sa.Enum('TELEGRAM', 'discord', name='platform'), nullable=False),
+    sa.Column('platform', sa.Enum('TELEGRAM', 'DISCORD', name='platform'), nullable=False),
     sa.Column('platform_chat_id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
@@ -47,7 +47,7 @@ def upgrade() -> None:
     op.create_table('output_messages',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('text', sa.String(), nullable=True),
-    sa.Column('sender_id', sa.Enum('SYSTEM', 'GPT_3_5', 'GPT_4', 'DALL_E', name='system_user'), nullable=False),
+    sa.Column('sender_id', sa.Enum('SYSTEM', 'GPT_3_5_TURBO', 'GPT_4', 'DALL_E', name='system_user'), nullable=False),
     sa.Column('prompt_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['prompt_id'], ['prompt_messages.id'], ),
     sa.PrimaryKeyConstraint('id')

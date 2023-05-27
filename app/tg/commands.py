@@ -1,15 +1,11 @@
-from sqlalchemy.sql import select, insert
-from telegram import Update, LabeledPrice
+from telegram import Update
 from telegram.constants import ChatType
 from telegram.ext import ContextTypes
 
 from app.ai.llms import gpt3_5_turbo, gpt4
-from app.core.config import config, settings
-from app.db import engine
-from app.db.enums import Platform, SystemUser
-from app.db.models import User, UserChannel
+from app.db.enums import SystemUser
 from app.db.schemas import TelegramUser, TelegramChat
-from app.tg.utils import ask_chat_openai, save_prompt_n_output_to_db
+from app.tg.utils import ask_chat_openai, save_prompt_n_output_to_db, get_or_create_user
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -24,39 +20,16 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         )
         return
 
-    with engine.connect() as conn:
-        statement = (
-            select(User.id, User.first_name, User.last_name)
-            .select_from(UserChannel)
-            .join(User, onclause=User.id == UserChannel.user_id)
-            .where(UserChannel.platform_user_id == platform_user_id)
-        )
-        result = conn.execute(statement)
-        existing_user = result.first()
-
-        if existing_user:
-            full_name = " ".join(filter(None, existing_user[1:]))
-            await update.message.reply_text(f"Welcome back {full_name}!")
-        else:
-            statement_2 = (
-                insert(User)
-                .values(
-                    first_name=tg_user.first_name,
-                    last_name=tg_user.last_name,
-                )
-                .returning(User.id)
-            )
-            result = conn.execute(statement_2)
-            user_id = result.first()[0]
-            statement_3 = insert(UserChannel).values(
-                platform=Platform.TELEGRAM,
-                platform_user_id=tg_chat.id,
-                user_id=user_id,
-                data=tg_chat.dict(),
-            )
-            result = conn.execute(statement_3)
-            print(result)
-            conn.commit()
+    result = get_or_create_user(
+        platform_user_id=platform_user_id,
+        first_name=tg_user.first_name,
+        last_name=tg_user.last_name,
+        data={"chat": tg_chat.dict()},
+    )
+    if result["is_created"]:
+        await update.message.reply_text(f"Welcome, {result['full_name']}!")
+    else:
+        await update.message.reply_text(f"Welcome back, {result['full_name']}!")
 
 
 async def hello(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

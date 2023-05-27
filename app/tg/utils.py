@@ -16,13 +16,13 @@ def ask_chat_openai(llm: ChatOpenAI, question: str) -> str:
     return response
 
 
-def save_prompt_n_output_to_db(platform_chat_id: int, prompt: str, output: str, system_sender: SystemUser) -> None:
+def save_prompt_n_output_to_db(platform_user_id: int, prompt: str, output: str, system_sender: SystemUser) -> None:
     with engine.connect() as conn:
         statement = (
             select(User.id, UserChannel.id)
             .select_from(UserChannel)
             .join(User, onclause=User.id == UserChannel.user_id)
-            .where(UserChannel.platform_chat_id == platform_chat_id)
+            .where(UserChannel.platform_user_id == platform_user_id)
         )
         result = conn.execute(statement)
         existing_user = result.first()

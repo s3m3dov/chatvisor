@@ -30,7 +30,7 @@ def upgrade() -> None:
     op.create_table('users_channels',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('platform', sa.Enum('TELEGRAM', 'DISCORD', name='platform'), nullable=False),
-    sa.Column('platform_chat_id', sa.Integer(), nullable=False),
+    sa.Column('platform_user_id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')

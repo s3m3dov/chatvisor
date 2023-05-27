@@ -39,7 +39,7 @@ class UserChannel(Base):
 
     id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
     platform: Mapped[Platform] = mapped_column(saEnum(Platform, name="platform"), nullable=False)
-    platform_chat_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    platform_user_id: Mapped[int] = mapped_column(Integer, nullable=False)
     data: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
 
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey(User.id), nullable=False)
@@ -48,7 +48,7 @@ class UserChannel(Base):
     prompts: Mapped[List["PromptMessage"]] = relationship(back_populates="channel")
 
     def __str__(self) -> str:
-        return f"{self.platform.name}: {self.platform_chat_id}"
+        return f"{self.platform.name}: {self.platform_user_id}"
 
 
 class PromptMessage(Base):

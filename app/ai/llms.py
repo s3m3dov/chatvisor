@@ -1,6 +1,6 @@
 from langchain.chat_models import ChatOpenAI
 
-from app.core.config import settings
+from core.config import settings
 
 gpt4 = ChatOpenAI(
     model_name="gpt-4",

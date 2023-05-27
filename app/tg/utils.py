@@ -4,9 +4,9 @@ from langchain.chat_models import ChatOpenAI
 from sqlalchemy.sql import insert, select
 
 from app.ai.chatbot import ChatBot
-from app.db import engine
-from app.db.enums import SystemUser, Platform
-from app.db.models import PromptMessage, UserChannel, User, OutputMessage
+from core.database import engine
+from core.entities.enums import SystemUser, Platform
+from core.entities.models import PromptMessage, UserChannel, User, OutputMessage
 
 log = print
 
@@ -21,7 +21,7 @@ def ask_chat_openai(llm: ChatOpenAI, question: str) -> str:
 
 
 def save_prompt_n_output_to_db(
-    platform_user_id: int, prompt: str, output: str, system_sender: SystemUser
+        platform_user_id: int, prompt: str, output: str, system_sender: SystemUser
 ) -> None:
     with engine.connect() as conn:
         statement = (
@@ -62,10 +62,10 @@ def save_prompt_n_output_to_db(
 
 
 def get_or_create_user(
-    platform_user_id: int,
-    first_name: str,
-    last_name: str,
-    data: Dict[str, Any],
+        platform_user_id: int,
+        first_name: str,
+        last_name: str,
+        data: Dict[str, Any],
 ) -> Dict[str, Any]:
     with engine.connect() as conn:
         statement = (

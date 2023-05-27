@@ -3,9 +3,10 @@ from telegram.constants import ChatType
 from telegram.ext import ContextTypes
 
 from app.ai.llms import gpt3_5_turbo, gpt4
-from app.db.enums import SystemUser
-from app.db.schemas import TelegramUser, TelegramChat
 from app.tg.utils import ask_chat_openai, save_prompt_n_output_to_db, get_or_create_user
+from core.config import settings
+from core.entities.enums import SystemUser
+from core.entities.schemas import TelegramUser, TelegramChat
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -82,4 +83,4 @@ async def ask_gpt4(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    pass
+    await update.message.reply_text(f"You can subscribe here: {settings.payment_link}")

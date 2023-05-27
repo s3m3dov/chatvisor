@@ -7,23 +7,43 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
+
+# Miscaleanous
 python-dotenv = "^1.0.0"
 requests = "^2.30.0"
-python-telegram-bot = "^20.3"
-stripe = "^5.4.0"
 pendulum = "^2.1.2"
-numpy = "^1.24.3"
-pandas = "^2.0.1"
-langchain = "^0.0.181"
-openai = "^0.27.7"
-tiktoken = "^0.4.0"
+
+# API Development
+fastapi = "^0.95.2"
+uvicorn = "^0.22.0"
+
+# Data Validation & Serialization
 pydantic = "^1.10.8"
-psycopg2-binary = "^2.9.6"
+
+# Database
 pgvector = "^0.1.8"
-SQLAlchemy-Utils = "^0.41.1"
+psycopg2-binary = "^2.9.6"
 alembic = "^1.11.1"
 sqlalchemy = "^2.0.15"
+SQLAlchemy-Utils = "^0.41.1"
 
+# Data Science
+numpy = "^1.24.3"
+pandas = "^2.0.1"
+tiktoken = "^0.4.0"
+langchain = "^0.0.181"
+openai = "^0.27.7"
+
+# Payment
+stripe = "^5.4.0"
+
+# Telegram
+python-telegram-bot = "^20.3"
+
+# Testing
+pytest = "^7.3.1"
+
+# New
 
 [build-system]
 requires = ["poetry-core"]

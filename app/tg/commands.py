@@ -94,3 +94,7 @@ async def ask_gpt4(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(response)
     save_prompt_n_output_to_db(platform_chat_id=platform_chat_id, prompt=question, output=response,
                                system_sender=SystemUser.GPT_4)
+
+
+async def subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    pass

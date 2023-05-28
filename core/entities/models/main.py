@@ -9,11 +9,12 @@ from sqlalchemy.orm import (
 from sqlalchemy.types import Enum as saEnum
 
 from core.entities.enums import Platform, SystemUser
-from .base import Base
+from .base import BaseModel
 
 
-class User(Base):
+class User(BaseModel):
     __tablename__ = "users"
+    __repr_attrs__ = ["id", "first_name", "last_name"]
 
     id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
     first_name: Mapped[str] = mapped_column(String, nullable=False)
@@ -30,8 +31,9 @@ class User(Base):
         )
 
 
-class UserChannel(Base):
+class UserChannel(BaseModel):
     __tablename__ = "users_channels"
+    __repr_attrs__ = ["id", "platform", "platform_user_id"]
 
     id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
     platform: Mapped[Platform] = mapped_column(saEnum(Platform, name="platform"), nullable=False)
@@ -47,8 +49,9 @@ class UserChannel(Base):
         return f"{self.platform.name}: {self.platform_user_id}"
 
 
-class PromptMessage(Base):
+class PromptMessage(BaseModel):
     __tablename__ = "prompt_messages"
+    __repr_attrs__ = ["id", "text", "sender_id", "channel_id"]
 
     id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
     text: Mapped[Optional[str]] = mapped_column(String, nullable=True)
@@ -62,8 +65,9 @@ class PromptMessage(Base):
     output: Mapped["OutputMessage"] = relationship(back_populates="prompt")
 
 
-class OutputMessage(Base):
+class OutputMessage(BaseModel):
     __tablename__ = "output_messages"
+    __repr_attrs__ = ["id", "text", "sender_id"]
 
     id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
     text: Mapped[Optional[str]] = mapped_column(String, nullable=True)

@@ -3,7 +3,7 @@ from telegram.constants import ChatType
 from telegram.ext import ContextTypes
 
 from app.ai.llms import gpt3_5_turbo, gpt4
-from app.tg.utils import ask_chat_openai, save_prompt_n_output_to_db, get_or_create_user
+from app.tg.utils import ask_chat_openai, save_prompt_n_output_to_db, get_or_create_user_new
 from core.config import settings
 from core.entities.enums import SystemUser
 from core.entities.schemas import TelegramUser, TelegramChat
@@ -21,7 +21,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         )
         return
 
-    result = get_or_create_user(
+    result = get_or_create_user_new(
         platform_user_id=platform_user_id,
         first_name=tg_user.first_name,
         last_name=tg_user.last_name,

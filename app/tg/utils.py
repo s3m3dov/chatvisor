@@ -21,7 +21,7 @@ def ask_chat_openai(llm: ChatOpenAI, question: str) -> str:
 
 
 def save_prompt_n_output_to_db(
-        platform_user_id: int, prompt: str, output: str, system_sender: SystemUser
+    platform_user_id: int, prompt: str, output: str, system_sender: SystemUser
 ) -> None:
     with engine.connect() as conn:
         statement = (
@@ -61,11 +61,48 @@ def save_prompt_n_output_to_db(
         conn.commit()
 
 
+def get_or_create_user_new(
+    platform_user_id: int,
+    first_name: str,
+    last_name: str,
+    data: Dict[str, Any],
+) -> Dict[str, Any]:
+    user_channel = (
+        UserChannel.with_joined(UserChannel.user)
+        .where(platform_user_id == platform_user_id)
+        .first()
+    )
+    log(f"user_channel: {user_channel}")
+
+    if not user_channel:
+        user = User.create(
+            first_name=first_name,
+            last_name=last_name,
+        )
+        log(f"user created: {user}")
+        UserChannel.create(
+            platform=Platform.TELEGRAM,
+            platform_user_id=platform_user_id,
+            user_id=user.id,
+            data=data,
+        )
+        is_created = True
+        full_name = f"{first_name} {last_name}"
+    else:
+        is_created = False
+        full_name = " ".join(filter(None, [user_channel.user.first_name, user_channel.user.last_name]))
+
+    return {
+        "is_created": is_created,
+        "full_name": full_name,
+    }
+
+
 def get_or_create_user(
-        platform_user_id: int,
-        first_name: str,
-        last_name: str,
-        data: Dict[str, Any],
+    platform_user_id: int,
+    first_name: str,
+    last_name: str,
+    data: Dict[str, Any],
 ) -> Dict[str, Any]:
     with engine.connect() as conn:
         statement = (

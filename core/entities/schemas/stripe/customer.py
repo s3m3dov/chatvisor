@@ -30,7 +30,7 @@ class Customer(BaseModel):
     invoice_prefix: str
     invoice_settings: InvoiceSettings
     livemode: bool
-    metadata: dict[str, str]
+    metadata: Optional[dict]
     name: str
     next_invoice_sequence: int
     phone: str

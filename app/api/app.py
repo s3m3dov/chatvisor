@@ -4,6 +4,7 @@ from fastapi.requests import Request
 from stripe.error import SignatureVerificationError
 
 from core.config import settings
+from core.entities.schemas import Customer, CustomerSubscription, Invoice
 
 app = FastAPI()
 
@@ -30,12 +31,31 @@ async def post_stripe_webhook(request: Request):
         return e
 
     # Handle the event
-    if event.type == "payment_intent.succeeded":
-        payment_intent = event.data.object
-        log("PaymentIntent was successful!")
-    elif event.type == "payment_method.attached":
-        payment_method = event.data.object
-        log("PaymentMethod was attached to a Customer!")
+    if event.type == "customer.created":
+        _customer = event.data.object
+        customer = Customer(**_customer)
+        log(f"Customer created: {customer}")
+
+    elif event.type == "customer.updated":
+        _customer = event.data.object
+        customer = Customer(**_customer)
+        log(f"Customer updated: {customer}")
+
+    elif event.type == "customer.subscription.created":
+        _subscription = event.data.object
+        subscription = CustomerSubscription(**_subscription)
+        log(f"Customer subscription created: {subscription}")
+
+    elif event.type == "customer.subscription.updated":
+        _subscription = event.data.object
+        subscription = CustomerSubscription(**_subscription)
+        log(f"Customer subscription updated: {subscription}")
+
+    elif event.type == "invoice.paid":
+        _invoice = event.data.object
+        invoice = Invoice(**_invoice)
+        log(f"Invoice paid: {invoice}")
+
     # ... handle other event types
     else:
         log(f"Unhandled event type {event.type}")

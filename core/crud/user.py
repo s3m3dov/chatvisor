@@ -1,11 +1,25 @@
 from typing import Any, Dict, Optional
 
-from stripe import Customer as StripeCustomer
+import stripe
 
+from config import settings
 from core.utils.basic import get_full_name
 from entities.enums import Platform, SystemUser
-from entities.models import UserChannel, User, PromptMessage, OutputMessage, Customer as CustomerModel
-from entities import Customer as CustomerSchema
+from entities.models import (
+    UserChannel,
+    User,
+    PromptMessage,
+    OutputMessage,
+    Customer as CustomerModel,
+    CustomerSubscription as SubscriptionModel,
+)
+from entities.schemas import (
+    Customer as CustomerSchema,
+    CustomerSubscription as SubscriptionSchema,
+    CheckoutSession
+)
+
+stripe.api_key = settings.stripe_secret_key
 
 log = print
 
@@ -18,6 +32,16 @@ def get_user_channel(platform_user_id: int) -> Optional[UserChannel]:
     )
     log(f"user_channel: {user_channel}")
     return user_channel
+
+
+def get_customer(user_id: int) -> Optional[CustomerModel]:
+    customer = (
+        CustomerModel.with_joined(CustomerModel.user)
+        .where(CustomerModel.user_id == user_id)
+        .first()
+    )
+    log(f"customer: {customer}")
+    return customer
 
 
 def get_or_create_user(
@@ -46,7 +70,9 @@ def get_or_create_user(
         full_name = get_full_name(first_name, last_name)
     else:
         is_created = False
-        full_name = get_full_name(user_channel.user.first_name, user_channel.user.last_name)
+        full_name = get_full_name(
+            user_channel.user.first_name, user_channel.user.last_name
+        )
 
     return {
         "is_created": is_created,
@@ -72,11 +98,34 @@ def save_prompt_n_output(
     log(f"OutputMessage created: {output_message}")
 
 
-def create_stripe_customer(user_id: int) -> StripeCustomer:
-    customer = StripeCustomer.create(
+def create_stripe_customer(user_id: int) -> stripe.Customer:
+    customer = stripe.Customer.create(
         metadata={"user_id": user_id},
     )
     return customer
+
+
+def create_checkout_session(customer_id: str) -> CheckoutSession:
+    _session = stripe.checkout.Session.create(
+        customer=customer_id,
+        payment_method_types=["card"],
+        line_items=[
+            {"price": settings.stripe_price_id, "quantity": 1},
+        ],
+        phone_number_collection={
+            "enabled": settings.phone_number_collection_enabled,
+        },
+        currency=settings.currency,
+        mode="subscription",
+        success_url=settings.stripe_success_url, subscription_data={
+            "trial_period_days": settings.trial_period_days,
+        },
+    )
+    session = CheckoutSession(
+        **_session
+    )
+
+    return session
 
 
 def create_customer_model(customer: CustomerSchema):
@@ -90,7 +139,7 @@ def create_customer_model(customer: CustomerSchema):
         full_name=customer.name,
         email=customer.email,
         phone=customer.phone,
-        metadata=customer.metadata,
+        meta_data=customer.metadata,
         created_at=customer.created,
     )
 
@@ -109,3 +158,36 @@ def update_customer_model(customer: CustomerSchema):
         email=customer.email,
         phone=customer.phone,
     )
+    customer_model.save()
+
+
+def create_customer_subscription_model(subscription: SubscriptionSchema):
+    customer_model = CustomerModel.find(subscription.customer)
+    if not customer_model:
+        raise ValueError(f"Customer with id={subscription.customer} not found")
+
+    SubscriptionModel.create(
+        id=subscription.id,
+        customer_id=subscription.customer,
+        created_at=subscription.created,
+        status=subscription.status,
+        current_period_start=subscription.current_period_start,
+        current_period_end=subscription.current_period_end,
+        cancel_at_period_end=subscription.cancel_at_period_end,
+        cancel_at=subscription.cancel_at,
+    )
+
+
+def update_customer_subscription_model(subscription: SubscriptionSchema):
+    subscription_model = SubscriptionModel.find(subscription.id)
+    if not subscription_model:
+        raise ValueError(f"Subscription with id={subscription.id} not found")
+
+    subscription_model.update(
+        status=subscription.status,
+        current_period_start=subscription.current_period_start,
+        current_period_end=subscription.current_period_end,
+        cancel_at_period_end=subscription.cancel_at_period_end,
+        cancel_at=subscription.cancel_at,
+    )
+    subscription_model.save()

@@ -33,6 +33,7 @@ class Config(BaseSettings):
     currency = "usd"
     phone_number_collection_enabled = True
     trial_period_days = 2
+    dashboard_url = "https://billing.stripe.com/p/login/test_14kfZT5bre7ubO8fYY"
 
     @property
     def telegram_bot_token(self) -> str:

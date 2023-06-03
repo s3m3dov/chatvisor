@@ -2,11 +2,13 @@ from telegram import Update
 from telegram.constants import ChatType
 from telegram.ext import ContextTypes
 
+from config import settings
 from core.crud.user import (
     get_or_create_user,
     get_user_channel,
     get_customer,
     create_checkout_session,
+    is_user_subscribed,
 )
 from entities.schemas import TelegramUser, TelegramChat
 
@@ -42,13 +44,34 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_channel = get_user_channel(platform_user_id=update.effective_user.id)
-    customer = get_customer(user_id=user_channel.user_id)
-    session = create_checkout_session(
-        user_id=user_channel.user_id, customer_id=customer.id
-    )
-    if session is None:
+    is_subscribed = is_user_subscribed(user_channel.user_id)
+
+    if is_subscribed:
         text = "You are already subscribed, enjoy!"
     else:
+        customer = get_customer(user_id=user_channel.user_id)
+        session = create_checkout_session(
+            user_id=user_channel.user_id, customer_id=customer.id
+        )
         text = f"You can subscribe here: {session.url}"
+
+    await update.message.reply_text(text)
+
+
+async def manage_subscription(
+        update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> None:
+    user_channel = get_user_channel(platform_user_id=update.effective_user.id)
+    is_subscribed = is_user_subscribed(user_channel.user_id)
+
+    if is_subscribed:
+        text = f"Manage your subscription here: {settings.dashboard_url}"
+
+    else:
+        customer = get_customer(user_id=user_channel.user_id)
+        session = create_checkout_session(
+            user_id=user_channel.user_id, customer_id=customer.id
+        )
+        text = f"You are not subscribed yet, please subscribe here: {session.url}"
 
     await update.message.reply_text(text)

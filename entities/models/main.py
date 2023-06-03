@@ -1,6 +1,6 @@
 from typing import Optional, List
 
-from sqlalchemy import (Integer, String, JSON, ForeignKey)
+from sqlalchemy import (Integer, String, Boolean, JSON, ForeignKey)
 from sqlalchemy.orm import (
     relationship,
     Mapped,
@@ -22,6 +22,9 @@ class User(BaseModel):
 
     channels: Mapped[List["UserChannel"]] = relationship(back_populates="user")
     prompts: Mapped[List["PromptMessage"]] = relationship(back_populates="sender")
+    customer: Mapped["Customer"] = relationship("Customer", uselist=False, back_populates="user")
+    customer_subscriptions: Mapped[List["CustomerSubscription"]] = relationship("CustomerSubscription",
+                                                                                back_populates="user")
 
     def __str__(self) -> str:
         return (
@@ -55,7 +58,7 @@ class PromptMessage(BaseModel):
 
     id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
     text: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    # embedding: Mapped[Optional[Vector]] = mapped_column(Vector, nullable=True)
+    # openai_embedding: Mapped[Optional[Vector]] = mapped_column(Vector, nullable=True)
 
     channel_id: Mapped[int] = mapped_column(Integer, ForeignKey(UserChannel.id), nullable=False)
     sender_id: Mapped[int] = mapped_column(Integer, ForeignKey(User.id), nullable=False)
@@ -71,9 +74,51 @@ class OutputMessage(BaseModel):
 
     id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True, nullable=False, autoincrement=True)
     text: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    # embedding: Mapped[Optional[Vector]] = mapped_column(Vector, nullable=True)
+    # openai_embedding: Mapped[Optional[Vector]] = mapped_column(Vector, nullable=True)
 
     sender_id: Mapped[SystemUser] = mapped_column(saEnum(SystemUser, name="system_user"), nullable=False)
     prompt_id: Mapped[int] = mapped_column(Integer, ForeignKey(PromptMessage.id), nullable=False)
 
     prompt: Mapped["PromptMessage"] = relationship(back_populates="output")
+
+
+class Customer(BaseModel):
+    """
+    Customer model;
+    data provided by Stripe.
+    """
+    __tablename__ = "customers"
+    __repr_attrs__ = ["id", "full_name", "email"]
+
+    id: Mapped[str] = mapped_column(Integer, primary_key=True, nullable=False)
+    full_name: Mapped[str] = mapped_column(String, nullable=True)
+    email: Mapped[str] = mapped_column(String, nullable=False)
+    phone: Mapped[str] = mapped_column(String, nullable=True)
+    meta_data: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    created_at: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey(User.id), nullable=True)
+
+    user: Mapped["User"] = relationship(back_populates="customer")
+
+
+class CustomerSubscription(BaseModel):
+    """
+    Customer subscription model;
+    data provided by Stripe.
+    """
+    __tablename__ = "customer_subscriptions"
+    __repr_attrs__ = ["id", "customer_id", "status"]
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, nullable=False)
+    customer_id: Mapped[str] = mapped_column(String, nullable=False)
+    status: Mapped[str] = mapped_column(String, nullable=False)
+    current_period_start: Mapped[int] = mapped_column(Integer, nullable=False)
+    current_period_end: Mapped[int] = mapped_column(Integer, nullable=False)
+    cancel_at_period_end: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    started_at: Mapped[int] = mapped_column(Integer, nullable=False)
+    cancel_at: Mapped[int] = mapped_column(Integer, nullable=True)
+
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey(User.id), nullable=True)
+
+    user: Mapped["User"] = relationship(back_populates="customer_subscriptions")

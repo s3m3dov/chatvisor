@@ -4,15 +4,15 @@ from telegram.ext import ContextTypes
 
 from core.crud.user import (
     get_or_create_user,
-    get_user_channel, get_customer, create_checkout_session,
+    get_user_channel,
+    get_customer,
+    create_checkout_session,
 )
 from entities.schemas import TelegramUser, TelegramChat
 
 
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    message = (
-        " ".join(context.args) if context.args else "You didn't say anything!"
-    )
+    message = " ".join(context.args) if context.args else "You didn't say anything!"
     await update.message.reply_text(message)
 
 
@@ -37,17 +37,15 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if result["is_created"]:
         await update.message.reply_text(f"Welcome, {result['full_name']}!")
     else:
-        await update.message.reply_text(
-            f"Welcome back, {result['full_name']}!"
-        )
+        await update.message.reply_text(f"Welcome back, {result['full_name']}!")
 
 
-async def subscribe(
-        update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> None:
+async def subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_channel = get_user_channel(platform_user_id=update.effective_user.id)
     customer = get_customer(user_id=user_channel.user_id)
-    session = create_checkout_session(user_id=user_channel.user_id, customer_id=customer.id)
+    session = create_checkout_session(
+        user_id=user_channel.user_id, customer_id=customer.id
+    )
     if session is None:
         text = "You are already subscribed, enjoy!"
     else:

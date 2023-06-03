@@ -19,15 +19,13 @@ class User(BaseModel):
     last_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     channels: Mapped[List["UserChannel"]] = relationship(back_populates="user")
-    prompts: Mapped[List["PromptMessage"]] = relationship(
-        back_populates="sender"
-    )
+    prompts: Mapped[List["PromptMessage"]] = relationship(back_populates="sender")
     customer: Mapped["Customer"] = relationship(
         "Customer", uselist=False, back_populates="user"
     )
-    customer_subscriptions: Mapped[
-        List["CustomerSubscription"]
-    ] = relationship("CustomerSubscription", back_populates="user")
+    customer_subscriptions: Mapped[List["CustomerSubscription"]] = relationship(
+        "CustomerSubscription", back_populates="user"
+    )
 
     def __str__(self) -> str:
         return (
@@ -50,14 +48,10 @@ class UserChannel(BaseModel):
     platform_user_id: Mapped[int] = mapped_column(Integer, nullable=False)
     data: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
 
-    user_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey(User.id), nullable=False
-    )
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey(User.id), nullable=False)
 
     user: Mapped["User"] = relationship(back_populates="channels")
-    prompts: Mapped[List["PromptMessage"]] = relationship(
-        back_populates="channel"
-    )
+    prompts: Mapped[List["PromptMessage"]] = relationship(back_populates="channel")
 
     def __str__(self) -> str:
         return f"{self.platform.name}: {self.platform_user_id}"
@@ -76,9 +70,7 @@ class PromptMessage(BaseModel):
     channel_id: Mapped[int] = mapped_column(
         Integer, ForeignKey(UserChannel.id), nullable=False
     )
-    sender_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey(User.id), nullable=False
-    )
+    sender_id: Mapped[int] = mapped_column(Integer, ForeignKey(User.id), nullable=False)
 
     channel: Mapped["UserChannel"] = relationship(back_populates="prompts")
     sender: Mapped["User"] = relationship(back_populates="prompts")
@@ -121,9 +113,7 @@ class Customer(BaseModel):
     phone: Mapped[str] = mapped_column(String, nullable=True)
     meta_data: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
 
-    user_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey(User.id), nullable=True
-    )
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey(User.id), nullable=True)
 
     user: Mapped["User"] = relationship(back_populates="customer")
 
@@ -146,10 +136,6 @@ class CustomerSubscription(BaseModel):
     cancel_at_period_end: Mapped[bool] = mapped_column(Boolean, nullable=False)
     cancel_at: Mapped[int] = mapped_column(Integer, nullable=True)
 
-    user_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey(User.id), nullable=True
-    )
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey(User.id), nullable=True)
 
-    user: Mapped["User"] = relationship(
-        back_populates="customer_subscriptions"
-    )
+    user: Mapped["User"] = relationship(back_populates="customer_subscriptions")

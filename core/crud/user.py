@@ -16,7 +16,7 @@ from entities.models import (
 from entities.schemas import (
     Customer as CustomerSchema,
     CustomerSubscription as SubscriptionSchema,
-    CheckoutSession
+    CheckoutSession,
 )
 
 stripe.api_key = settings.stripe_secret_key
@@ -45,10 +45,10 @@ def get_customer(user_id: int) -> Optional[CustomerModel]:
 
 
 def get_or_create_user(
-        platform_user_id: int,
-        first_name: str,
-        last_name: str,
-        data: Dict[str, Any],
+    platform_user_id: int,
+    first_name: str,
+    last_name: str,
+    data: Dict[str, Any],
 ) -> Dict[str, Any]:
     user_channel = get_user_channel(platform_user_id=platform_user_id)
 
@@ -81,7 +81,7 @@ def get_or_create_user(
 
 
 def save_prompt_n_output(
-        platform_user_id: int, prompt: str, output: str, system_sender: SystemUser
+    platform_user_id: int, prompt: str, output: str, system_sender: SystemUser
 ) -> None:
     user_channel = get_user_channel(platform_user_id=platform_user_id)
     prompt_message = PromptMessage.create(
@@ -107,8 +107,7 @@ def create_stripe_customer(user_id: int) -> stripe.Customer:
 
 def is_user_subscribed(user_id: int) -> bool:
     subscription_model = (
-        SubscriptionModel
-        .with_joined(SubscriptionModel.user)
+        SubscriptionModel.with_joined(SubscriptionModel.user)
         .where(SubscriptionModel.user_id == user_id)
         .first()
     )
@@ -118,7 +117,9 @@ def is_user_subscribed(user_id: int) -> bool:
     return True
 
 
-def create_checkout_session(user_id: int, customer_id: str) -> Optional[CheckoutSession]:
+def create_checkout_session(
+    user_id: int, customer_id: str
+) -> Optional[CheckoutSession]:
     is_subscribed = is_user_subscribed(user_id)
 
     if is_subscribed:
@@ -135,14 +136,13 @@ def create_checkout_session(user_id: int, customer_id: str) -> Optional[Checkout
         },
         currency=settings.currency,
         mode="subscription",
-        success_url=settings.stripe_success_url, subscription_data={
+        success_url=settings.stripe_success_url,
+        subscription_data={
             "trial_settings": {"end_behavior": {"missing_payment_method": "pause"}},
             "trial_period_days": settings.trial_period_days,
         },
     )
-    session = CheckoutSession(
-        **_session
-    )
+    session = CheckoutSession(**_session)
 
     return session
 

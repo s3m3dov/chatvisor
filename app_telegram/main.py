@@ -1,9 +1,8 @@
-from dotenv import dotenv_values
 from telegram.ext import ApplicationBuilder, Application
 
-from app.commands import command_handlers, command_info
+from config import settings
+from .commands import command_handlers, command_info
 
-config = dotenv_values(".env")
 log = print
 
 
@@ -12,11 +11,11 @@ async def post_init(application: Application) -> None:
     await bot.set_my_commands(commands=command_info)
 
 
-if __name__ == "__main__":
+def start_bot() -> None:
     log("Starting bot...")
     app = (
         ApplicationBuilder()
-        .token(config["TELEGRAM_BOT_TOKEN"])
+        .token(settings.telegram.bot_token)
         .post_init(post_init)
         .build()
     )

@@ -9,9 +9,7 @@ from core.crud.user import (
 from entities.enums import SystemUser
 
 
-async def ask_gpt3_5_turbo(
-        update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> None:
+async def ask_gpt3_5_turbo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not context.args:
         await update.message.reply_text(
             "You need to ask a question in the format `/gpt3_5_turbo <question>`"

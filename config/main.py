@@ -7,6 +7,7 @@ config = dotenv_values(".env")
 
 class Config(BaseSettings):
     """Config class for settings."""
+
     max_tokens = {
         "default": 300,
         "gpt-3": 300,

@@ -75,6 +75,7 @@ class Plan(BaseModel):
     trial_period_days: Optional[int]
     usage_type: str
 
+
 class PaymentSettings(BaseModel):
     default_mandate: Optional[str]
     payment_method_options: Optional[str]

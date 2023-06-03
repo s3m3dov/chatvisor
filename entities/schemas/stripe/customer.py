@@ -7,6 +7,7 @@ from .base import Address
 
 class InvoiceSettings(BaseModel):
     """Invoice settings model."""
+
     custom_fields: Optional[List[str]]
     default_payment_method: Optional[str]
     footer: Optional[str]
@@ -15,6 +16,7 @@ class InvoiceSettings(BaseModel):
 
 class Customer(BaseModel):
     """Customer model."""
+
     id: str
     object: str
     created: int

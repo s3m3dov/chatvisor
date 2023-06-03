@@ -1,8 +1,11 @@
 from typing import Any, Dict, Optional
 
-from app.utils.basic import get_full_name
-from core.entities.enums import Platform, SystemUser
-from core.entities.models import UserChannel, User, PromptMessage, OutputMessage
+from stripe import Customer as StripeCustomer
+
+from core.utils.basic import get_full_name
+from entities.enums import Platform, SystemUser
+from entities.models import UserChannel, User, PromptMessage, OutputMessage, Customer as CustomerModel
+from entities import Customer as CustomerSchema
 
 log = print
 
@@ -37,6 +40,8 @@ def get_or_create_user(
             user_id=user.id,
             data=data,
         )
+        create_stripe_customer(user_id=user.id)
+
         is_created = True
         full_name = get_full_name(first_name, last_name)
     else:
@@ -65,3 +70,42 @@ def save_prompt_n_output(
         sender_id=system_sender,
     )
     log(f"OutputMessage created: {output_message}")
+
+
+def create_stripe_customer(user_id: int) -> StripeCustomer:
+    customer = StripeCustomer.create(
+        metadata={"user_id": user_id},
+    )
+    return customer
+
+
+def create_customer_model(customer: CustomerSchema):
+    user_id = customer.metadata.get("user_id")
+    if not user_id:
+        raise ValueError("user_id not found in customer metadata")
+
+    CustomerModel.create(
+        id=customer.id,
+        user_id=user_id,
+        full_name=customer.name,
+        email=customer.email,
+        phone=customer.phone,
+        metadata=customer.metadata,
+        created_at=customer.created,
+    )
+
+
+def update_customer_model(customer: CustomerSchema):
+    user_id = customer.metadata.get("user_id")
+    if not user_id:
+        raise ValueError("user_id not found in customer metadata")
+
+    customer_model = CustomerModel.find(customer.id)
+    if not customer_model:
+        raise ValueError(f"Customer with id={customer.id} not found")
+
+    customer_model.update(
+        full_name=customer.name,
+        email=customer.email,
+        phone=customer.phone,
+    )

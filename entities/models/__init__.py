@@ -8,3 +8,8 @@ from .main import (
     User,
     UserChannel
 )
+
+from .main import (
+    Customer,
+    CustomerSubscription,
+)

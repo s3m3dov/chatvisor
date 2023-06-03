@@ -1,6 +1,6 @@
 from langchain.chat_models import ChatOpenAI
 
-from app.ai.chatbot import ChatBot
+from core.ai.chatbot import ChatBot
 
 log = print
 

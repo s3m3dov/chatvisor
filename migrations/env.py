@@ -3,7 +3,7 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
-from core.config import settings
+from config import settings
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -18,13 +18,8 @@ if config.config_file_name is not None:
 # Model / Schema imports
 # add your model's MetaData object here
 # for 'autogenerate' support
-from core.entities.models.base import Base  # noqa: F401
-from core.entities.models import (
-    User,
-    PromptMessage,
-    OutputMessage,
-    UserChannel
-)  # noqa: F401 # pylint: disable=unused-import # isort:skip (be sure to import all models you need migrated)
+from entities.models.base import Base  # noqa: F401
+
 target_metadata = Base.metadata
 
 

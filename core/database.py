@@ -3,5 +3,5 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 
 from config import settings
 
-engine = create_engine(settings.database_url, echo=True)
+engine = create_engine(settings.db.uri, echo=True)
 session = scoped_session(sessionmaker(bind=engine))

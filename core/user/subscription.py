@@ -9,7 +9,7 @@ from entities.schemas import (
     CustomerSubscription as SubscriptionSchema,
 )
 
-stripe.api_key = settings.stripe_secret_key
+stripe.api_key = settings.stripe.api_secret_key
 
 log = print
 

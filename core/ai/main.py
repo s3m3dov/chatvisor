@@ -48,6 +48,7 @@ class ChatBotOpenAI:
         prompt_message = PromptMessage.create(
             text=prompt,
             sender_id=self.user_channel.user_id,
+            receiver_id=self.llm_config.name,
             channel_id=self.user_channel.id,
             prompt_tokens=prompt_tokens,
             completion_tokens=completion_tokens,
@@ -55,10 +56,10 @@ class ChatBotOpenAI:
         log(f"PromptMessage created: {prompt_message}")
         return prompt_message
 
-    async def save_output(self, output: str, prompt_message: PromptMessage) -> None:
+    @staticmethod
+    async def save_output(output: str, prompt_message: PromptMessage) -> None:
         OutputMessage.create(
             text=output,
             prompt_id=prompt_message.id,
-            sender_id=self.llm_config.name,
         )
         log(f"PromptMessage created: {prompt_message}")

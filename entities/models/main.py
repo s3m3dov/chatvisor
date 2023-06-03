@@ -57,7 +57,9 @@ class UserChannel(BaseModel):
     platform_user_id: Mapped[int] = mapped_column(Integer, nullable=False)
     data: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
 
-    user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(User.id), nullable=False)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(User.id), nullable=False
+    )
 
     user: Mapped["User"] = relationship(back_populates="channels")
     prompts: Mapped[List["PromptMessage"]] = relationship(back_populates="channel")
@@ -81,7 +83,12 @@ class PromptMessage(BaseModel):
     channel_id: Mapped[int] = mapped_column(
         Integer, ForeignKey(UserChannel.id), nullable=False
     )
-    sender_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(User.id), nullable=False)
+    sender_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(User.id), nullable=False
+    )
+    receiver_id: Mapped[SystemUser] = mapped_column(
+        saEnum(SystemUser, name="system_user"), nullable=False
+    )
 
     channel: Mapped["UserChannel"] = relationship(back_populates="prompts")
     sender: Mapped["User"] = relationship(back_populates="prompts")
@@ -98,9 +105,6 @@ class OutputMessage(BaseModel):
     text: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     # openai_embedding: Mapped[Optional[Vector]] = mapped_column(Vector, nullable=True)
 
-    sender_id: Mapped[SystemUser] = mapped_column(
-        saEnum(SystemUser, name="system_user"), nullable=False
-    )
     prompt_id: Mapped[int] = mapped_column(
         Integer, ForeignKey(PromptMessage.id), nullable=False
     )

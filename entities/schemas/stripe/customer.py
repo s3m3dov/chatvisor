@@ -15,26 +15,29 @@ class InvoiceSettings(BaseModel):
 
 class Customer(BaseModel):
     """Customer model."""
+    id: str
     object: str
-    address: Address
-    balance: float
     created: int
+
+    metadata: Optional[dict]
+    livemode: Optional[bool]
+
+    name: Optional[str]
+    email: Optional[str]
+    phone: Optional[str]
+    address: Optional[Address]
+    balance: Optional[float]
+
     currency: Optional[str]
     default_currency: Optional[str]
     default_source: Optional[str]
-    delinquent: bool
+    delinquent: Optional[bool]
     description: Optional[str]
     discount: Optional[float]
-    email: str
-    id: str
-    invoice_prefix: str
-    invoice_settings: InvoiceSettings
-    livemode: bool
-    metadata: Optional[dict]
-    name: str
-    next_invoice_sequence: int
-    phone: str
+    invoice_prefix: Optional[str]
+    invoice_settings: Optional[InvoiceSettings]
+    next_invoice_sequence: Optional[int]
     preferred_locales: List[str]
-    shipping: Any
-    tax_exempt: str
+    shipping: Optional[Any]
+    tax_exempt: Optional[str]
     test_clock: Optional[str]

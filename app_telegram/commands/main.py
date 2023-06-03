@@ -59,7 +59,7 @@ async def manage_subscription(
 
     if is_subscribed:
         await update.message.reply_text(
-            f"Manage your subscription here: {settings.dashboard_url}"
+            f"Manage your subscription here: {settings.stripe.dashboard_url}"
         )
     else:
         await update.message.reply_text(

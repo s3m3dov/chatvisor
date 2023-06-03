@@ -17,13 +17,13 @@ log = print
 class SubscriptionCRUD:
     @staticmethod
     def create_subscription(subscription: SubscriptionSchema):
-        user_id = subscription.metadata.get("user_id")
-        log(f"user_id: {user_id}")
-        user = User.find_or_fail(user_id)
+        user = User.where(
+           customer_id__exact=subscription.customer
+        ).first()
+        log(f"user: {user}")
 
         SubscriptionModel.create(
             id=subscription.id,
-            customer_id=subscription.customer,
             created_at=subscription.created,
             status=subscription.status,
             current_period_start=subscription.current_period_start,

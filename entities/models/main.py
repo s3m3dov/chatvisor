@@ -1,7 +1,8 @@
+import uuid
 from typing import Optional, List
 
 import pendulum
-from sqlalchemy import Integer, String, Boolean, JSON, ForeignKey
+from sqlalchemy import Integer, String, Boolean, JSON, ForeignKey, UUID
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy.types import Enum as saEnum
 
@@ -13,10 +14,10 @@ class User(BaseModel):
     __tablename__ = "users"
     __repr_attrs__ = ["id", "first_name", "last_name", "full_name"]
 
-    id: Mapped[Optional[int]] = mapped_column(
-        Integer, primary_key=True, nullable=False, autoincrement=True
-    )
-    customer_id: Mapped[str] = mapped_column(String, nullable=False)  # Customer ID in Stripe
+    id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, nullable=False)
+    customer_id: Mapped[str] = mapped_column(
+        String, nullable=False
+    )  # Customer ID in Stripe
 
     created_at: Mapped[int] = mapped_column(
         Integer, nullable=False, default=pendulum.now("UTC").int_timestamp
@@ -56,7 +57,7 @@ class UserChannel(BaseModel):
     platform_user_id: Mapped[int] = mapped_column(Integer, nullable=False)
     data: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
 
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey(User.id), nullable=False)
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(User.id), nullable=False)
 
     user: Mapped["User"] = relationship(back_populates="channels")
     prompts: Mapped[List["PromptMessage"]] = relationship(back_populates="channel")
@@ -80,7 +81,7 @@ class PromptMessage(BaseModel):
     channel_id: Mapped[int] = mapped_column(
         Integer, ForeignKey(UserChannel.id), nullable=False
     )
-    sender_id: Mapped[int] = mapped_column(Integer, ForeignKey(User.id), nullable=False)
+    sender_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(User.id), nullable=False)
 
     channel: Mapped["UserChannel"] = relationship(back_populates="prompts")
     sender: Mapped["User"] = relationship(back_populates="prompts")
@@ -133,6 +134,6 @@ class CustomerSubscription(BaseModel):
     cancel_at_period_end: Mapped[bool] = mapped_column(Boolean, nullable=False)
     cancel_at: Mapped[int] = mapped_column(Integer, nullable=True)
 
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey(User.id), nullable=True)
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(User.id), nullable=True)
 
     user: Mapped["User"] = relationship(back_populates="customer_subscriptions")

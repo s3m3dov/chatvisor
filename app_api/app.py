@@ -4,12 +4,8 @@ from fastapi.requests import Request
 from stripe.error import SignatureVerificationError
 
 from config import settings
-from core.crud.user import (
-    create_customer_model,
-    update_customer_model,
-    update_customer_subscription_model,
-    create_customer_subscription_model,
-)
+from core.user.main import UserCRUD
+from core.user.subscription import SubscriptionCRUD
 from entities.schemas import Customer, CustomerSubscription, Invoice
 
 app = FastAPI()
@@ -37,37 +33,29 @@ async def post_stripe_webhook(request: Request):
         return e
 
     # Handle the event
-    if event.type == "customer.created":
-        _customer = event.data.object
-        customer = Customer(**_customer)
-        log(f"Customer created: {customer}")
-        create_customer_model(customer=customer)
+    match event.type:
+        case "customer.updated":
+            _customer = event.data.object
+            customer = Customer(**_customer)
+            log(f"Customer updated: {customer}")
+            UserCRUD.update_user_via_stripe(customer=customer)
 
-    elif event.type == "customer.updated":
-        _customer = event.data.object
-        customer = Customer(**_customer)
-        log(f"Customer updated: {customer}")
-        update_customer_model(customer=customer)
+        case "customer.subscription.created":
+            _subscription = event.data.object
+            subscription = CustomerSubscription(**_subscription)
+            log(f"Customer subscription created: {subscription}")
+            SubscriptionCRUD.create_subscription(subscription=subscription)
 
-    elif event.type == "customer.subscription.created":
-        _subscription = event.data.object
-        subscription = CustomerSubscription(**_subscription)
-        log(f"Customer subscription created: {subscription}")
-        create_customer_subscription_model(subscription=subscription)
+        case "customer.subscription.updated":
+            _subscription = event.data.object
+            subscription = CustomerSubscription(**_subscription)
+            log(f"Customer subscription updated: {subscription}")
+            SubscriptionCRUD.update_subscription(subscription=subscription)
 
-    elif event.type == "customer.subscription.updated":
-        _subscription = event.data.object
-        subscription = CustomerSubscription(**_subscription)
-        log(f"Customer subscription updated: {subscription}")
-        update_customer_subscription_model(subscription=subscription)
+        case "invoice.paid":
+            _invoice = event.data.object
+            invoice = Invoice(**_invoice)
+            log(f"Invoice paid: {invoice}")
 
-    # payment_intent.succeeded
-
-    elif event.type == "invoice.paid":
-        _invoice = event.data.object
-        invoice = Invoice(**_invoice)
-        log(f"Invoice paid: {invoice}")
-
-    # ... handle other event types
-    else:
-        log(f"Unhandled event type {event.type}")
+        case other:
+            log(f"Unhandled event type: {other}")

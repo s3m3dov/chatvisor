@@ -3,14 +3,13 @@ from telegram.constants import ChatType
 from telegram.ext import ContextTypes
 
 from config import settings
-from core.crud.user import (
+from core.user.checkout import CheckoutSessionCRUD
+from core.user.main import (
     get_or_create_user,
     get_user_channel,
-    get_customer,
-    create_checkout_session,
-    is_user_subscribed,
 )
-from entities.schemas import TelegramUser, TelegramChat
+from entities.enums import Platform
+from entities.schemas import TelegramUser
 
 
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -19,59 +18,48 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    tg_user = TelegramUser(**update.effective_user.to_dict())
-    tg_chat = TelegramChat(**update.effective_chat.to_dict())
-
-    platform_user_id = tg_user.id
-
-    if tg_chat.type != ChatType.PRIVATE.value:
+    if update.effective_chat.type != ChatType.PRIVATE.value:
         await update.message.reply_text(
             "It's only possible to use this bot in private chats."
         )
         return
 
-    result = get_or_create_user(
-        platform_user_id=platform_user_id,
-        first_name=tg_user.first_name,
-        last_name=tg_user.last_name,
-        data={"chat": tg_chat.dict()},
-    )
-    if result["is_created"]:
-        await update.message.reply_text(f"Welcome, {result['full_name']}!")
+    _user = update.effective_user.to_dict()
+    _chat = update.effective_chat.to_dict()
+    tg_user = TelegramUser(**_user, chat=_chat)
+
+    is_created, user = get_or_create_user(platform=Platform.TELEGRAM, data=tg_user)
+    if is_created:
+        await update.message.reply_text(f"Welcome, {user.full_name}!")
     else:
-        await update.message.reply_text(f"Welcome back, {result['full_name']}!")
+        await update.message.reply_text(f"Welcome back, {user.full_name}!")
 
 
 async def subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_channel = get_user_channel(platform_user_id=update.effective_user.id)
-    is_subscribed = is_user_subscribed(user_channel.user_id)
+    is_subscribed, session = CheckoutSessionCRUD.create_checkout_session(
+        user_channel.user
+    )
 
     if is_subscribed:
-        text = "You are already subscribed, enjoy!"
+        await update.message.reply_text("You are already subscribed, enjoy!")
     else:
-        customer = get_customer(user_id=user_channel.user_id)
-        session = create_checkout_session(
-            user_id=user_channel.user_id, customer_id=customer.id
-        )
-        text = f"You can subscribe here: {session.url}"
-
-    await update.message.reply_text(text)
+        await update.message.reply_text(f"You can subscribe here: {session.url}")
 
 
 async def manage_subscription(
-        update: Update, context: ContextTypes.DEFAULT_TYPE
+    update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> None:
     user_channel = get_user_channel(platform_user_id=update.effective_user.id)
-    is_subscribed = is_user_subscribed(user_channel.user_id)
+    is_subscribed, session = CheckoutSessionCRUD.create_checkout_session(
+        user_channel.user
+    )
 
     if is_subscribed:
-        text = f"Manage your subscription here: {settings.dashboard_url}"
-
-    else:
-        customer = get_customer(user_id=user_channel.user_id)
-        session = create_checkout_session(
-            user_id=user_channel.user_id, customer_id=customer.id
+        await update.message.reply_text(
+            f"Manage your subscription here: {settings.dashboard_url}"
         )
-        text = f"You are not subscribed yet, please subscribe here: {session.url}"
-
-    await update.message.reply_text(text)
+    else:
+        await update.message.reply_text(
+            f"You are not subscribed yet, please subscribe here: {session.url}"
+        )

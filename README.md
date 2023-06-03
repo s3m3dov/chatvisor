@@ -64,5 +64,5 @@ python start_api_server.py
 Stripe Webhook
 
 ```bash
-stripe listen --forward-to localhost:8000/strip/webhook
+stripe listen --forward-to localhost:8000/stripe/webhook
 ```

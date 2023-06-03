@@ -4,15 +4,7 @@ from pydantic.class_validators import validator
 from pydantic.main import BaseModel
 from telegram.constants import ChatType
 
-
-class TelegramUser(BaseModel):
-    id: int
-    first_name: str
-    last_name: Optional[str] = None
-    username: str
-    language_code: Optional[str] = None
-    is_bot: Optional[bool] = False
-    is_premium: Optional[bool] = False
+__all__ = ["TelegramUser"]
 
 
 class TelegramChat(BaseModel):
@@ -30,3 +22,18 @@ class TelegramChat(BaseModel):
         if v not in ChatType.__members__.values():
             raise ValueError(f"Invalid chat type: {v}")
         return v.value
+
+
+class TelegramOptionalData(BaseModel):
+    language_code: Optional[str] = None
+    is_premium: Optional[bool] = False
+    chat: Optional[TelegramChat]
+
+
+class TelegramUser(BaseModel):
+    id: int
+    first_name: str
+    last_name: Optional[str] = None
+    username: str
+    is_bot: Optional[bool] = False
+    optional_data: Optional[TelegramOptionalData]

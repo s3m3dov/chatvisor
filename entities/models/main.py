@@ -19,12 +19,12 @@ class User(BaseModel):
     customer_id: Mapped[str] = mapped_column(String, nullable=False)  # Customer ID in Stripe
 
     created_at: Mapped[int] = mapped_column(
-        Integer, nullable=False, default_factory=pendulum.now("UTC").int_timestamp
+        Integer, nullable=False, default=pendulum.now("UTC").int_timestamp
     )
     updated_at: Mapped[int] = mapped_column(
         Integer,
         nullable=False,
-        default_factory=pendulum.now("UTC").int_timestamp,
+        default=pendulum.now("UTC").int_timestamp,
         onupdate=pendulum.now("UTC").int_timestamp,
     )
 
@@ -124,7 +124,7 @@ class CustomerSubscription(BaseModel):
     updated_at: Mapped[int] = mapped_column(
         Integer,
         nullable=False,
-        default_factory=pendulum.now("UTC").int_timestamp,
+        default=pendulum.now("UTC").int_timestamp,
         onupdate=pendulum.now("UTC").int_timestamp,
     )
 

@@ -15,7 +15,7 @@ def start_bot() -> None:
     log("Starting bot...")
     app = (
         ApplicationBuilder()
-        .token(settings.telegram_bot_token)
+        .token(settings.telegram.bot_token)
         .post_init(post_init)
         .build()
     )

@@ -26,7 +26,7 @@ class DBConfig(BaseModel):
     database: str
 
     @property
-    def database_url(self) -> str:
+    def uri(self) -> str:
         """Database url."""
         url = "{driver}://{user}:{password}@{host}:{port}/{database}"
         return url.format(

@@ -15,7 +15,6 @@ log = print
 
 @app.post("/stripe/webhook")
 async def post_stripe_webhook(request: Request):
-    event = None
     payload = await request.body()
     sig_header = request.headers.get("Stripe-Signature")
 

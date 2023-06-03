@@ -51,7 +51,7 @@ pytest = "^7.3.1"
 # New
 
 [tool.poetry.dev-dependencies]
-black = "^21.10b0"
+black = "^23.3.0"
 flake8 = "^3.9.2"
 isort = "^5.9.3"
 

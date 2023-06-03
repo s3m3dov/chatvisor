@@ -80,7 +80,7 @@ class CustomerSubscription(BaseModel):
     billing_cycle_anchor: int
     billing_thresholds: Optional[List[int]]
     collection_method: str
-    default_payment_method: str
+    default_payment_method: Optional[str]
     default_source: Optional[str]
     default_tax_rates: Optional[List[str]]
     description: Optional[str]

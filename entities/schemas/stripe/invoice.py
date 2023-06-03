@@ -73,10 +73,10 @@ class Invoice(BaseModel):
     currency: str
     custom_fields: Optional[None]
     customer: str
-    customer_address: Address
+    customer_address: Optional[Address]
     customer_email: str
     customer_name: str
-    customer_phone: str
+    customer_phone: Optional[str]
     customer_shipping: Optional[str]
     customer_tax_exempt: str
     customer_tax_ids: List[str]

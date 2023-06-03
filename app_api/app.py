@@ -3,9 +3,14 @@ from fastapi.applications import FastAPI
 from fastapi.requests import Request
 from stripe.error import SignatureVerificationError
 
-from app.utils.user import create_customer_model, update_customer_model
-from core.config import settings
-from core.entities.schemas import Customer, CustomerSubscription, Invoice
+from config import settings
+from core.crud.user import (
+    create_customer_model,
+    update_customer_model,
+    update_customer_subscription_model,
+    create_customer_subscription_model,
+)
+from entities.schemas import Customer, CustomerSubscription, Invoice
 
 app = FastAPI()
 
@@ -48,11 +53,15 @@ async def post_stripe_webhook(request: Request):
         _subscription = event.data.object
         subscription = CustomerSubscription(**_subscription)
         log(f"Customer subscription created: {subscription}")
+        create_customer_subscription_model(subscription=subscription)
 
     elif event.type == "customer.subscription.updated":
         _subscription = event.data.object
         subscription = CustomerSubscription(**_subscription)
         log(f"Customer subscription updated: {subscription}")
+        update_customer_subscription_model(subscription=subscription)
+
+    # payment_intent.succeeded
 
     elif event.type == "invoice.paid":
         _invoice = event.data.object

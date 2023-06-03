@@ -24,7 +24,14 @@ class Config(BaseSettings):
         "dall-e": 0.3,
     }
     payment_link = config["STRIPE_PAYMENT_LINK"]
+    stripe_public_key = config["STRIPE_API_PUBLISHABLE_KEY"]
+    stripe_secret_key = config["STRIPE_API_SECRET_KEY"]
     stripe_webhook_secret = config["STRIPE_WEBHOOK_SECRET"]
+    stripe_price_id = "price_1NAWLbHCGQv2kDWZu8N1uuOO"
+    stripe_success_url = "https://s3m3dov.github.io/simple-success-page/"
+    currency = "usd"
+    phone_number_collection_enabled = True
+    trial_period_days = 2
 
     @property
     def telegram_bot_token(self) -> str:
@@ -43,5 +50,3 @@ class Config(BaseSettings):
             database=config["DB_DATABASE"],
         )
         return url
-
-

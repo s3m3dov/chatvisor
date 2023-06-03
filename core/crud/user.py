@@ -118,6 +118,7 @@ def create_checkout_session(customer_id: str) -> CheckoutSession:
         currency=settings.currency,
         mode="subscription",
         success_url=settings.stripe_success_url, subscription_data={
+            "trial_settings": {"end_behavior": {"missing_payment_method": "pause"}},
             "trial_period_days": settings.trial_period_days,
         },
     )
@@ -181,7 +182,7 @@ def create_customer_subscription_model(subscription: SubscriptionSchema):
 def update_customer_subscription_model(subscription: SubscriptionSchema):
     subscription_model = SubscriptionModel.find(subscription.id)
     if not subscription_model:
-        raise ValueError(f"Subscription with id={subscription.id} not found")
+        create_customer_subscription_model(subscription)
 
     subscription_model.update(
         status=subscription.status,

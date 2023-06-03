@@ -105,7 +105,25 @@ def create_stripe_customer(user_id: int) -> stripe.Customer:
     return customer
 
 
-def create_checkout_session(customer_id: str) -> CheckoutSession:
+def is_user_subscribed(user_id: int) -> bool:
+    subscription_model = (
+        SubscriptionModel
+        .with_joined(SubscriptionModel.user)
+        .where(SubscriptionModel.user_id == user_id)
+        .first()
+    )
+    if not subscription_model:
+        return False
+
+    return True
+
+
+def create_checkout_session(user_id: int, customer_id: str) -> Optional[CheckoutSession]:
+    is_subscribed = is_user_subscribed(user_id)
+
+    if is_subscribed:
+        return None
+
     _session = stripe.checkout.Session.create(
         customer=customer_id,
         payment_method_types=["card"],
@@ -167,6 +185,9 @@ def create_customer_subscription_model(subscription: SubscriptionSchema):
     if not customer_model:
         raise ValueError(f"Customer with id={subscription.customer} not found")
 
+    if is_user_subscribed(customer_model.user_id):
+        raise ValueError(f"User with id={customer_model.user_id} already subscribed")
+
     SubscriptionModel.create(
         id=subscription.id,
         customer_id=subscription.customer,
@@ -176,6 +197,7 @@ def create_customer_subscription_model(subscription: SubscriptionSchema):
         current_period_end=subscription.current_period_end,
         cancel_at_period_end=subscription.cancel_at_period_end,
         cancel_at=subscription.cancel_at,
+        user_id=customer_model.user_id,
     )
 
 

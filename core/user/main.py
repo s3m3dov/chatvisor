@@ -29,8 +29,9 @@ class UserCRUD:
         return uuid.uuid4()
 
     @staticmethod
-    def _create_stripe_customer(user_id: uuid.UUID) -> CustomerSchema:
+    def _create_stripe_customer(user_id: uuid.UUID, full_name: str) -> CustomerSchema:
         _customer: stripe.Customer = stripe.Customer.create(
+            name=full_name,
             metadata={"user_id": user_id}
         )
         customer = CustomerSchema(**_customer)
@@ -39,13 +40,14 @@ class UserCRUD:
     @classmethod
     def create_user(cls, platform: Platform, data: Union[TelegramUser]):
         unique_id = cls._generate_uuid()
-        customer = cls._create_stripe_customer(user_id=unique_id)
+        full_name = get_full_name(data.first_name, data.last_name)
+        customer = cls._create_stripe_customer(user_id=unique_id, full_name=full_name)
         user = User.create(
             id=unique_id,
             customer_id=customer.id,
             first_name=data.first_name,
             last_name=data.last_name,
-            full_name=get_full_name(data.first_name, data.last_name),
+            full_name=full_name,
             meta_data=customer.metadata,
             email=customer.email,
             phone=customer.phone,

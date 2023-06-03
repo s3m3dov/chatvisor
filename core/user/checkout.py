@@ -26,17 +26,17 @@ class CheckoutSessionCRUD:
             metadata={"user_id": user.id},
             mode="subscription",
             payment_method_types=["card"],
-            currency=settings.currency,
-            success_url=settings.stripe_success_url,
-            line_items=[
-                {"price": settings.stripe_price_id, "quantity": 1},
-            ],
+            currency=settings.stripe.currency,
+            success_url=settings.stripe.success_url,
             phone_number_collection={
-                "enabled": settings.phone_number_collection_enabled,
+                "enabled": settings.stripe.phone_number_collection_enabled,
             },
+            line_items=[
+                {"price": settings.stripe.price_id, "quantity": 1},
+            ],
             subscription_data={
                 "trial_settings": {"end_behavior": {"missing_payment_method": "pause"}},
-                "trial_period_days": settings.trial_period_days,
+                "trial_period_days": settings.stripe.trial_period_days,
             },
         )
         session = CheckoutSession(**_session)
@@ -47,8 +47,16 @@ class CheckoutSessionCRUD:
     def create_checkout_session(
         cls, user: User
     ) -> Tuple[bool, Optional[CheckoutSession]]:
+        """Get an employee.
+        Args:
+            user: User: The internal user + stripe customer.
+
+        Returns:
+            bool: True if the user is subscribed.
+            CheckoutSession: The checkout session if user is not subscribed.
+        """
         if is_user_subscribed(user_id=user.id):
-            return False, None
+            return True, None
         else:
             session = cls._create_checkout_session(user=user)
-            return True, session
+            return False, session

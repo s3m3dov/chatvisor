@@ -26,7 +26,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     _user = update.effective_user.to_dict()
     _chat = update.effective_chat.to_dict()
-    tg_user = TelegramUser(**_user, chat=_chat)
+    tg_user = TelegramUser(
+        **_user, optional_data={"chat": _chat, "language_code": _user["language_code"]}
+    )
 
     is_created, user = get_or_create_user(platform=Platform.TELEGRAM, data=tg_user)
     if is_created:

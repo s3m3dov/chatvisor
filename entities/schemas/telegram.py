@@ -26,7 +26,6 @@ class TelegramChat(BaseModel):
 
 class TelegramOptionalData(BaseModel):
     language_code: Optional[str] = None
-    is_premium: Optional[bool] = False
     chat: Optional[TelegramChat]
 
 

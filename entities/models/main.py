@@ -1,5 +1,6 @@
 from typing import Optional, List
 
+import pendulum
 from sqlalchemy import Integer, String, Boolean, JSON, ForeignKey
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy.types import Enum as saEnum
@@ -10,29 +11,36 @@ from .base import BaseModel
 
 class User(BaseModel):
     __tablename__ = "users"
-    __repr_attrs__ = ["id", "first_name", "last_name"]
+    __repr_attrs__ = ["id", "first_name", "last_name", "full_name"]
 
     id: Mapped[Optional[int]] = mapped_column(
         Integer, primary_key=True, nullable=False, autoincrement=True
     )
+    customer_id: Mapped[str] = mapped_column(String, nullable=False)  # Customer ID in Stripe
+
+    created_at: Mapped[int] = mapped_column(
+        Integer, nullable=False, default_factory=pendulum.now("UTC").int_timestamp
+    )
+    updated_at: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default_factory=pendulum.now("UTC").int_timestamp,
+        onupdate=pendulum.now("UTC").int_timestamp,
+    )
+
     first_name: Mapped[str] = mapped_column(String, nullable=False)
     last_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    full_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+
+    email: Mapped[str] = mapped_column(String, nullable=True)
+    phone: Mapped[str] = mapped_column(String, nullable=True)
+    meta_data: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
 
     channels: Mapped[List["UserChannel"]] = relationship(back_populates="user")
     prompts: Mapped[List["PromptMessage"]] = relationship(back_populates="sender")
-    customer: Mapped["Customer"] = relationship(
-        "Customer", uselist=False, back_populates="user"
-    )
     customer_subscriptions: Mapped[List["CustomerSubscription"]] = relationship(
         "CustomerSubscription", back_populates="user"
     )
-
-    def __str__(self) -> str:
-        return (
-            " ".join([self.first_name, self.last_name])
-            if self.last_name
-            else self.first_name
-        )
 
 
 class UserChannel(BaseModel):
@@ -65,6 +73,8 @@ class PromptMessage(BaseModel):
         Integer, primary_key=True, nullable=False, autoincrement=True
     )
     text: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    prompt_tokens: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    completion_tokens: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     # openai_embedding: Mapped[Optional[Vector]] = mapped_column(Vector, nullable=True)
 
     channel_id: Mapped[int] = mapped_column(
@@ -97,27 +107,6 @@ class OutputMessage(BaseModel):
     prompt: Mapped["PromptMessage"] = relationship(back_populates="output")
 
 
-class Customer(BaseModel):
-    """
-    Customer model;
-    data provided by Stripe.
-    """
-
-    __tablename__ = "customers"
-    __repr_attrs__ = ["id", "full_name", "email"]
-
-    id: Mapped[str] = mapped_column(String, primary_key=True, nullable=False)
-    created_at: Mapped[int] = mapped_column(Integer, nullable=False)
-    full_name: Mapped[str] = mapped_column(String, nullable=True)
-    email: Mapped[str] = mapped_column(String, nullable=True)
-    phone: Mapped[str] = mapped_column(String, nullable=True)
-    meta_data: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
-
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey(User.id), nullable=True)
-
-    user: Mapped["User"] = relationship(back_populates="customer")
-
-
 class CustomerSubscription(BaseModel):
     """
     Customer subscription model;
@@ -125,12 +114,20 @@ class CustomerSubscription(BaseModel):
     """
 
     __tablename__ = "customer_subscriptions"
-    __repr_attrs__ = ["id", "customer_id", "status"]
+    __repr_attrs__ = ["id", "status"]
 
     id: Mapped[str] = mapped_column(String, primary_key=True, nullable=False)
-    customer_id: Mapped[str] = mapped_column(String, nullable=False)
-    created_at: Mapped[int] = mapped_column(Integer, nullable=False)
     status: Mapped[str] = mapped_column(String, nullable=False)
+    created_at: Mapped[int] = mapped_column(
+        Integer, nullable=False
+    )  # Customer `created_at` in Stripe
+    updated_at: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default_factory=pendulum.now("UTC").int_timestamp,
+        onupdate=pendulum.now("UTC").int_timestamp,
+    )
+
     current_period_start: Mapped[int] = mapped_column(Integer, nullable=False)
     current_period_end: Mapped[int] = mapped_column(Integer, nullable=False)
     cancel_at_period_end: Mapped[bool] = mapped_column(Boolean, nullable=False)

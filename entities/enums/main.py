@@ -10,6 +10,6 @@ class Platform(StrEnum, BaseEnum):
 
 class SystemUser(StrEnum, BaseEnum):
     SYSTEM = "system"
-    GPT_3_5_TURBO = "gpt-3.5 turbo"
+    GPT_3_5_TURBO = "gpt-3.5-turbo"
     GPT_4 = "gpt-4"
     DALL_E = "dall-e"

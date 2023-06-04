@@ -37,9 +37,11 @@ class PlanLogic:
 
     def get_current_plan(self) -> PlanConfig:
         subscription = self.get_subscription(self.user_id)
-        if self.is_premium(subscription):
+        if subscription and self.is_premium(subscription):
+            log(f"User {self.user_id} is premium")
             return settings.premium_plan
         else:
+            log(f"User {self.user_id} is basic")
             return settings.basic_plan
 
     def is_plan_limit_reached(self) -> bool:
@@ -56,13 +58,21 @@ class PlanLogic:
     def is_day_limit_reached(self) -> bool:
         usage = self.get_daily_usage()
         result = usage >= self.plan.limit_amount
-        log(f"Usage: {usage}, plan: {self.plan.name}, limit: {self.plan.limit_amount}, result: {result}")
+        log(
+            f"Usage: {usage}, user: {self.user_id}, channel: {self.channel_id}, plan: {self.plan.name}, "
+            f"duration: {self.plan.limit_duration},  limit: {self.plan.limit_amount}, "
+            f"result: {result}"
+        )
         return result
 
     def is_lifetime_limit_reached(self) -> bool:
         usage = self.get_lifetime_usage()
         result = usage >= self.plan.limit_amount
-        log(f"Usage: {usage}, plan: {self.plan.name}, limit: {self.plan.limit_amount}, result: {result}")
+        log(
+            f"Usage: {usage}, user: {self.user_id}, channel: {self.channel_id}, plan: {self.plan.name}, "
+            f"duration: {self.plan.limit_duration},  limit: {self.plan.limit_amount}, "
+            f"result: {result}"
+        )
         return result
 
     def get_daily_usage(self) -> float:
@@ -75,7 +85,7 @@ class PlanLogic:
             )
             .scalar()
         )
-        return usage
+        return usage or 0
 
     def get_lifetime_usage(self) -> float:
         usage = (
@@ -83,4 +93,4 @@ class PlanLogic:
             .filter(PromptMessage.channel_id == self.channel_id)
             .scalar()
         )
-        return usage
+        return usage or 0

@@ -1,8 +1,8 @@
 """Initial Migration
 
-Revision ID: 1e06f9db6a2d
+Revision ID: 313aa6e840e1
 Revises: 
-Create Date: 2023-06-04 01:14:46.115173
+Create Date: 2023-06-04 16:12:30.279973
 
 """
 from alembic import op
@@ -13,7 +13,7 @@ import pgvector
 
 
 # revision identifiers, used by Alembic.
-revision = '1e06f9db6a2d'
+revision = '313aa6e840e1'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -58,11 +58,14 @@ def upgrade() -> None:
     )
     op.create_table('prompt_messages',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('text', sa.String(), nullable=True),
-    sa.Column('prompt_tokens', sa.Integer(), nullable=True),
-    sa.Column('completion_tokens', sa.Integer(), nullable=True),
+    sa.Column('text', sa.String(), nullable=False),
+    sa.Column('prompt_tokens', sa.Integer(), nullable=False),
+    sa.Column('completion_tokens', sa.Integer(), nullable=False),
+    sa.Column('cost', sa.Float(precision=8), nullable=False),
+    sa.Column('openai_embedding', pgvector.sqlalchemy.Vector(), nullable=True),
     sa.Column('channel_id', sa.Integer(), nullable=False),
     sa.Column('sender_id', sa.UUID(), nullable=False),
+    sa.Column('receiver_id', sa.Enum('SYSTEM', 'GPT_3_5_TURBO', 'GPT_4', 'DALL_E', name='system_user'), nullable=False),
     sa.ForeignKeyConstraint(['channel_id'], ['users_channels.id'], ),
     sa.ForeignKeyConstraint(['sender_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -70,7 +73,7 @@ def upgrade() -> None:
     op.create_table('output_messages',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('text', sa.String(), nullable=True),
-    sa.Column('sender_id', sa.Enum('SYSTEM', 'GPT_3_5_TURBO', 'GPT_4', 'DALL_E', name='system_user'), nullable=False),
+    sa.Column('openai_embedding', pgvector.sqlalchemy.Vector(), nullable=True),
     sa.Column('prompt_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['prompt_id'], ['prompt_messages.id'], ),
     sa.PrimaryKeyConstraint('id')

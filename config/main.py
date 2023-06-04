@@ -41,12 +41,12 @@ class Config(BaseSettings):
     )
     basic_plan: PlanConfig = PlanConfig(
         name=Plan.BASIC,
-        limit_amount=0.6,
+        limit_amount=0.1,
         limit_duration=PlanLimitDuration.LIFETIME,
     )
     premium_plan: PlanConfig = PlanConfig(
         name=Plan.PREMIUM,
-        limit_amount=3,
+        limit_amount=1,
         limit_duration=PlanLimitDuration.DAILY,
     )
     stripe: StripeConfig = StripeConfig(

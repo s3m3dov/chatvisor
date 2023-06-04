@@ -2,7 +2,7 @@ from typing import Optional
 
 from pydantic.main import BaseModel
 
-from entities.enums import SystemUser
+from entities.enums import SystemUser, Plan, PlanLimitDuration
 
 
 class TelegramConfig(BaseModel):
@@ -47,8 +47,16 @@ class LLMConfig(BaseModel):
     name: SystemUser
     temperature: float = 0.3
     max_tokens: int = 300
-    free_tokens: int = 2000
-    paid_tokens_per_day: int = 10000
+
+
+class PlanConfig(BaseModel):
+    """
+    Config for Plan
+    """
+
+    name: Plan
+    limit_amount: Optional[float] = None  # in USD
+    limit_duration: Optional[PlanLimitDuration] = None  # in days
 
 
 class StripeConfig(BaseModel):
@@ -69,5 +77,3 @@ class StripeConfig(BaseModel):
     phone_number_collection_enabled: bool = True
 
     payment_link: Optional[str]
-
-

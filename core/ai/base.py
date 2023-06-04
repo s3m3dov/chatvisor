@@ -27,11 +27,12 @@ class BaseAgent:
             verbose=True,
         )
 
-    def predict(self, *args, **kwargs) -> Tuple[str, int, int]:  #
+    def predict(self, *args, **kwargs) -> Tuple[str, int, int, float]:  #
         with get_openai_callback() as cb:
             result = self.engine.predict(*args, **kwargs)
             prompt_tokens = cb.prompt_tokens
             completion_tokens = cb.completion_tokens
+            total_cost = round(cb.total_cost, 6)
             log(
                 f"Total Tokens: {cb.total_tokens}\n"
                 f"Prompt Tokens: {prompt_tokens}\n"
@@ -39,4 +40,4 @@ class BaseAgent:
                 f"Total Cost (USD): ${cb.total_cost}\n"
             )
 
-        return result, prompt_tokens, completion_tokens
+        return result, prompt_tokens, completion_tokens, total_cost

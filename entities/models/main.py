@@ -2,7 +2,8 @@ import uuid
 from typing import Optional, List
 
 import pendulum
-from sqlalchemy import Integer, String, Boolean, JSON, ForeignKey, UUID
+from pgvector.sqlalchemy import Vector
+from sqlalchemy import Integer, String, Boolean, JSON, ForeignKey, UUID, Float
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy.types import Enum as saEnum
 
@@ -75,10 +76,11 @@ class PromptMessage(BaseModel):
     id: Mapped[Optional[int]] = mapped_column(
         Integer, primary_key=True, nullable=False, autoincrement=True
     )
-    text: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    prompt_tokens: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    completion_tokens: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    # openai_embedding: Mapped[Optional[Vector]] = mapped_column(Vector, nullable=True)
+    text: Mapped[Optional[str]] = mapped_column(String, nullable=False)
+    prompt_tokens: Mapped[Optional[int]] = mapped_column(Integer, nullable=False)
+    completion_tokens: Mapped[Optional[int]] = mapped_column(Integer, nullable=False)
+    cost: Mapped[Optional[float]] = mapped_column(Float(precision=8), nullable=False)  # in USD
+    openai_embedding: Mapped[Optional[Vector]] = mapped_column(Vector, nullable=True)
 
     channel_id: Mapped[int] = mapped_column(
         Integer, ForeignKey(UserChannel.id), nullable=False
@@ -103,7 +105,7 @@ class OutputMessage(BaseModel):
         Integer, primary_key=True, nullable=False, autoincrement=True
     )
     text: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    # openai_embedding: Mapped[Optional[Vector]] = mapped_column(Vector, nullable=True)
+    openai_embedding: Mapped[Optional[Vector]] = mapped_column(Vector, nullable=True)
 
     prompt_id: Mapped[int] = mapped_column(
         Integer, ForeignKey(PromptMessage.id), nullable=False

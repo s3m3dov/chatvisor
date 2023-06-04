@@ -1,14 +1,21 @@
 from dotenv import dotenv_values
 from pydantic import BaseSettings
 
-from entities.config_schemas.main import LLMConfig, TelegramConfig, DBConfig, StripeConfig
-from entities.enums import SystemUser
+from entities.config_schemas.main import (
+    LLMConfig,
+    TelegramConfig,
+    DBConfig,
+    StripeConfig,
+    PlanConfig,
+)
+from entities.enums import SystemUser, Plan, PlanLimitDuration
 
 config = dotenv_values(".env")
 
 
 class Config(BaseSettings):
     """Config class for settings."""
+
     openapi_key: str = config["OPENAI_API_KEY"]
 
     telegram: TelegramConfig = TelegramConfig(
@@ -22,19 +29,25 @@ class Config(BaseSettings):
         port=config["DB_PORT"],
         database=config["DB_DATABASE"],
     )
-    gpt4: LLMConfig = LLMConfig(
-        name=SystemUser.GPT_4,
-        temperature=0.3,
-        max_tokens=300,
-        free_tokens=2000,
-        paid_tokens_per_day=10000,
-    )
     gpt3_5_turbo: LLMConfig = LLMConfig(
         name=SystemUser.GPT_3_5_TURBO,
         temperature=0.3,
         max_tokens=300,
-        free_tokens=2000,
-        paid_tokens_per_day=10000,
+    )
+    gpt4: LLMConfig = LLMConfig(
+        name=SystemUser.GPT_4,
+        temperature=0.3,
+        max_tokens=450,
+    )
+    basic_plan: PlanConfig = PlanConfig(
+        name=Plan.BASIC,
+        limit_amount=0.6,
+        limit_duration=PlanLimitDuration.LIFETIME,
+    )
+    premium_plan: PlanConfig = PlanConfig(
+        name=Plan.PREMIUM,
+        limit_amount=3,
+        limit_duration=PlanLimitDuration.DAILY,
     )
     stripe: StripeConfig = StripeConfig(
         api_pub_key=config["STRIPE_API_PUBLISHABLE_KEY"],
@@ -43,5 +56,5 @@ class Config(BaseSettings):
         success_url="https://s3m3dov.github.io/simple-success-page/",
         dashboard_url="https://billing.stripe.com/p/login/test_14kfZT5bre7ubO8fYY",
         price_id="price_1NAWLbHCGQv2kDWZu8N1uuOO",
-        trial_period_days=2,
+        trial_period_days=1,
     )

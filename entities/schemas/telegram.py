@@ -31,8 +31,8 @@ class TelegramOptionalData(BaseModel):
 
 class TelegramUser(BaseModel):
     id: int
-    first_name: str
+    first_name: Optional[str] = None
     last_name: Optional[str] = None
-    username: str
+    username: Optional[str] = None
     is_bot: Optional[bool] = False
     optional_data: Optional[TelegramOptionalData]

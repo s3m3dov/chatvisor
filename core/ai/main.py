@@ -1,5 +1,6 @@
 from langchain.chat_models import ChatOpenAI
 
+from config import settings
 from entities.config_schemas.main import LLMConfig
 from entities.models import UserChannel, PromptMessage, OutputMessage
 from .base import BaseAgent
@@ -22,6 +23,7 @@ class ChatBotOpenAI:
 
     def init_llm(self) -> ChatOpenAI:
         llm = ChatOpenAI(
+            openai_api_key=settings.openapi_key,
             model_name=self.llm_config.name.value,
             max_tokens=self.llm_config.max_tokens,
             temperature=self.llm_config.temperature,
@@ -29,7 +31,7 @@ class ChatBotOpenAI:
         return llm
 
     async def ask(self, question: str) -> str:
-        response, prompt_tokens, completion_tokens = self.bot.predict(
+        response, prompt_tokens, completion_tokens, cost = self.bot.predict(
             input=question,
             history=None,
         )
@@ -37,13 +39,14 @@ class ChatBotOpenAI:
             prompt=question,
             prompt_tokens=prompt_tokens,
             completion_tokens=completion_tokens,
+            cost=cost,
         )
         await self.save_output(output=response, prompt_message=prompt_message)
 
         return response
 
     async def save_prompt(
-        self, prompt: str, prompt_tokens: int, completion_tokens: int
+            self, prompt: str, prompt_tokens: int, completion_tokens: int, cost: float
     ) -> PromptMessage:
         prompt_message = PromptMessage.create(
             text=prompt,
@@ -52,6 +55,7 @@ class ChatBotOpenAI:
             channel_id=self.user_channel.id,
             prompt_tokens=prompt_tokens,
             completion_tokens=completion_tokens,
+            cost=cost,
         )
         log(f"PromptMessage created: {prompt_message}")
         return prompt_message

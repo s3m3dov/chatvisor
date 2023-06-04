@@ -9,6 +9,7 @@ config = dotenv_values(".env")
 
 class Config(BaseSettings):
     """Config class for settings."""
+    openapi_key: str = config["OPENAI_API_KEY"]
 
     telegram: TelegramConfig = TelegramConfig(
         bot_token=config["TELEGRAM_BOT_TOKEN"],

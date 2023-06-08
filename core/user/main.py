@@ -31,14 +31,13 @@ class UserCRUD:
     @staticmethod
     def _create_stripe_customer(user_id: uuid.UUID, full_name: str) -> CustomerSchema:
         _customer: stripe.Customer = stripe.Customer.create(
-            name=full_name,
-            metadata={"user_id": user_id}
+            name=full_name, metadata={"user_id": user_id}
         )
         customer = CustomerSchema(**_customer)
         return customer
 
     @classmethod
-    def create_user(cls, platform: Platform, data: Union[TelegramUser]):
+    def create_user_n_channel(cls, platform: Platform, data: Union[TelegramUser]) -> UserChannel:
         unique_id = cls._generate_uuid()
         full_name = get_full_name(data.first_name, data.last_name)
         customer = cls._create_stripe_customer(user_id=unique_id, full_name=full_name)
@@ -53,13 +52,13 @@ class UserCRUD:
             phone=customer.phone,
         )
         log(f"user created: {user}")
-        UserChannel.create(
+        user_channel = UserChannel.create(
             platform=platform,
             platform_user_id=data.id,
             user_id=user.id,
             data=data.optional_data.dict(),
         )
-        return user
+        return user_channel
 
     @staticmethod
     def update_user_via_stripe(customer: CustomerSchema) -> User:
@@ -77,27 +76,20 @@ class UserCRUD:
         return user
 
 
-def get_user_channel(platform_user_id: int) -> Optional[UserChannel]:
+def get_or_create_user_channel(platform: Platform, data: Union[TelegramUser]) -> Tuple[bool, Optional[UserChannel]]:
+    platform_user_id = data.id
+    log(f"getting user channel: platform_user_id: {platform_user_id}")
     user_channel = (
         UserChannel.with_joined(UserChannel.user)
         .where(UserChannel.platform_user_id == platform_user_id)
         .first()
     )
-    log(f"user_channel: {user_channel}")
-    return user_channel
-
-
-def get_or_create_user(
-    platform: Platform,
-    data: Union[TelegramUser],
-) -> Tuple[bool, User]:
-    user_channel = get_user_channel(platform_user_id=data.id)
 
     if not user_channel:
-        user = UserCRUD.create_user(platform=platform, data=data)
+        user_channel = UserCRUD.create_user_n_channel(platform=platform, data=data)
         is_created = True
     else:
-        user = user_channel.user
         is_created = False
 
-    return is_created, user
+    log(f"user_channel: {user_channel}")
+    return is_created, user_channel

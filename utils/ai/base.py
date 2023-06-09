@@ -5,7 +5,7 @@ from langchain.base_language import BaseLanguageModel
 from langchain.callbacks import get_openai_callback
 from langchain.prompts.prompt import PromptTemplate
 
-from core.ai.constants import TEMPLATE
+from utils.ai.constants import TEMPLATE
 
 log = print
 

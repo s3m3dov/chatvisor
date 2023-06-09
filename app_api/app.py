@@ -3,9 +3,9 @@ from fastapi.applications import FastAPI
 from fastapi.requests import Request
 from stripe.error import SignatureVerificationError
 
-from config import settings
-from core.user.main import UserCRUD
-from core.user.subscription import SubscriptionCRUD
+from core.config import settings
+from utils.user.main import UserCRUD
+from utils.user.subscription import SubscriptionCRUD
 from entities.schemas import Customer, CustomerSubscription, Invoice
 
 app = FastAPI()

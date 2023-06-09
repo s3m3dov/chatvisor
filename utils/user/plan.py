@@ -3,9 +3,9 @@ from typing import Optional
 import pendulum
 from sqlalchemy import func
 
-from config import settings
+from core.config import settings
 from core.database import session
-from entities.config_schemas.main import PlanConfig
+from core.config.submodels.main import PlanConfig
 from entities.enums import SubscriptionStatus, PlanLimitDuration
 from entities.models import CustomerSubscription, PromptMessage
 

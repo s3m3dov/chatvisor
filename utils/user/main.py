@@ -4,8 +4,8 @@ from typing import Union
 
 import stripe
 
-from config import settings
-from core.user.base import get_full_name
+from core.config import settings
+from utils.user.base import get_full_name
 from entities.enums import Platform
 from entities.models import (
     User,

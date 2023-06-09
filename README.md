@@ -6,11 +6,14 @@ Smart Bot with lots of abilities.
 
 - Python 3.11
 - PostgresSQL
-- LangChain
+- [langchain](https://github.com/hwchase17/langchain)
 - OpenAI
 - Stripe
-- python-telegram-bot
+- [python-telegram-bot](https://github.com/python-telegram-bot/python-telegram-bot)
+- [colorlog](https://github.com/borntyping/python-colorlog)
 - alembic
+- SQLAlchemy
+- SQLAlchemy-Mixins
 
 ## Set-up
 

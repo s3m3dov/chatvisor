@@ -2,9 +2,9 @@ from telegram import Update
 from telegram.constants import ChatType
 from telegram.ext import ContextTypes
 
-from config import settings
-from core.user.checkout import CheckoutSessionCRUD
-from core.user.main import get_or_create_user_channel
+from core.config import settings
+from utils.user.checkout import CheckoutSessionCRUD
+from utils.user.main import get_or_create_user_channel
 from entities.enums import Platform
 from entities.schemas import TelegramUser
 

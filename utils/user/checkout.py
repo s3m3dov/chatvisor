@@ -2,7 +2,7 @@ from typing import Optional, Tuple
 
 import stripe
 
-from config import settings
+from core.config import settings
 from entities.models import (
     User,
 )

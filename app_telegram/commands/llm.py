@@ -1,10 +1,10 @@
 from telegram import Update
 from telegram.ext import ContextTypes
 
-from config import settings
-from core.ai.main import ChatBotOpenAI
-from core.user.main import get_or_create_user_channel
-from core.user.plan import PlanLogic
+from core.config import settings
+from utils.ai.main import ChatBotOpenAI
+from utils.user.main import get_or_create_user_channel
+from utils.user.plan import PlanLogic
 from entities.enums import Platform
 from entities.schemas import TelegramUser
 

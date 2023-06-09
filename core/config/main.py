@@ -1,7 +1,7 @@
 from dotenv import dotenv_values
 from pydantic import BaseSettings
 
-from entities.config_schemas.main import (
+from core.config.submodels.main import (
     LLMConfig,
     TelegramConfig,
     DBConfig,

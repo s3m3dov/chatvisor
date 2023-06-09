@@ -1,7 +1,7 @@
 from langchain.chat_models import ChatOpenAI
 
-from config import settings
-from entities.config_schemas.main import LLMConfig
+from core.config import settings
+from core.config.submodels.main import LLMConfig
 from entities.models import UserChannel, PromptMessage, OutputMessage
 from .base import BaseAgent
 

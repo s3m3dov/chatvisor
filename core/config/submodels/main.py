@@ -10,11 +10,7 @@ __all__ = [
     "LLMConfig",
     "PlanConfig",
     "StripeConfig",
-    "LoggingConfig",
 ]
-
-
-
 
 
 class TelegramConfig(BaseModel):

@@ -32,7 +32,7 @@ class BaseAgent:
             prompt_tokens = cb.prompt_tokens
             completion_tokens = cb.completion_tokens
             total_cost = round(cb.total_cost, 6)
-            logger.ino(
+            logger.info(
                 f"Total Tokens: {cb.total_tokens}\n"
                 f"Prompt Tokens: {prompt_tokens}\n"
                 f"Completion Tokens: {completion_tokens}\n"

@@ -1,11 +1,12 @@
 from telegram import BotCommand
-from telegram.ext import CommandHandler
+from telegram.ext import CommandHandler, filters, MessageHandler
 
-from .llm import (
-    ask_gpt3_5_turbo,
-    ask_gpt4,
-)
-from .main import start, echo, subscribe, manage_subscription
+from .error import error_handler, bad_command
+from .general import start, echo, subscribe, manage_subscription
+from .llm import ask_gpt3_5_turbo, ask_gpt4, ask_default
+from .llm.base import base_openai_ask
+
+__all__ = ["error_handler", "message_handler", "command_handlers", "command_info"]
 
 command_handlers = [
     CommandHandler("start", start),
@@ -14,6 +15,7 @@ command_handlers = [
     CommandHandler("gpt4", ask_gpt4),
     CommandHandler("echo", echo),
     CommandHandler("manage_subscription", manage_subscription),
+    # CommandHandler("bad_command", bad_command),
 ]
 command_info = [
     BotCommand("start", "Start the bot"),
@@ -23,3 +25,4 @@ command_info = [
     BotCommand("echo", "Echo the message"),
     BotCommand("manage_subscription", "Manage your subscription"),
 ]
+message_handler = MessageHandler(filters.TEXT & ~filters.COMMAND, ask_default)

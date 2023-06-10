@@ -1,6 +1,5 @@
 FROM python:3.11
 
-
 # Install system dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -11,9 +10,9 @@ RUN apt-get update && \
 # Set working directory
 WORKDIR /app
 
-# Install Python dependencies
+# Copy pyproject.toml and install Python dependencies
 COPY pyproject.toml /app/
-RUN pip install poetry && \
+RUN pip install poetry --cache-dir /tmp/pip-cache && \
     poetry config virtualenvs.create false && \
     poetry install --only main --no-interaction --no-ansi
 

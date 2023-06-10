@@ -14,9 +14,9 @@ handler.setFormatter(default_formatter)
 logger.addHandler(handler)
 
 slack_handler = SlackLogHandler(
-    slack_token=settings.slack_token,
-    channel=settings.slack_channel,
-    icon_url=settings.slack_icon_url,
+    slack_token=settings.slack.token,
+    channel=settings.slack.channel,
+    icon_url=settings.slack.icon_url,
     username="SmartBot App Alerts",
     stack_trace=True,
     fail_silent=False,

@@ -6,7 +6,7 @@ from entities.enums import SystemUser, Plan, PlanLimitDuration
 
 __all__ = [
     "TelegramConfig",
-    "DBConfig",
+    "SlackConfig",
     "LLMConfig",
     "PlanConfig",
     "StripeConfig",
@@ -20,6 +20,12 @@ class TelegramConfig(BaseModel):
 
     bot_token: str
     developer_chat_id: int = 718361797
+
+
+class SlackConfig(BaseModel):
+    token: str
+    channel: str
+    icon_url: str
 
 
 class DBConfig(BaseModel):

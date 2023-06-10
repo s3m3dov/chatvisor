@@ -10,11 +10,6 @@ from utils.user.checkout import CheckoutSessionCRUD
 from utils.user.main import get_or_create_user_channel
 
 
-async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    message = " ".join(context.args) if context.args else "You didn't say anything!"
-    await update.message.reply_text(message)
-
-
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     logger.debug(f"Started app: {update.effective_user.username}")
 
@@ -84,3 +79,8 @@ async def manage_subscription(
         await update.message.reply_text(
             f"You are not subscribed yet, please subscribe here: {session.url}"
         )
+
+
+async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    message = " ".join(context.args) if context.args else "You didn't say anything!"
+    await update.message.reply_text(message)

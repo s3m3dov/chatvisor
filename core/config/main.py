@@ -15,8 +15,10 @@ config = dotenv_values(".env")
 
 class Config(BaseSettings):
     """Config class for settings."""
-
     openapi_key: str = config["OPENAI_API_KEY"]
+    slack_icon_url: str = "https://avatars.slack-edge.com/2023-06-09/5426672302464_1bddaa605d4fe61b6cc0_512.png"
+    slack_token: str = config["SLACK_API_TOKEN"]
+    slack_channel: str = config["SLACK_CHANNEL"]
 
     telegram: TelegramConfig = TelegramConfig(
         bot_token=config["TELEGRAM_BOT_TOKEN"],

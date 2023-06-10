@@ -1,19 +1,25 @@
 import logging
 
-from slacker_log_handler import SlackerLogHandler
+from log_to_slack import SlackLogHandler
 
+from core.config import settings
 from core.extensions.log_formatter import default_formatter
 
-__all__ = ["default_handler", "slack_handler"]
+__all__ = ["logger"]
 
-default_handler = logging.StreamHandler()
-default_handler.setFormatter(default_formatter)
+logger = logging.getLogger("SmartBot App")
 
-slack_handler = SlackerLogHandler(
-    api_key="xapp-1-A05BDKKMGUF-5395593308166-0d206b97a13ab72b63c3d405f3cdb67fe71cd7aa93ab08ecd1a62108bc7c84fd",
-    channel="random",
+handler = logging.StreamHandler()
+handler.setFormatter(default_formatter)
+logger.addHandler(handler)
+
+slack_handler = SlackLogHandler(
+    slack_token=settings.slack_token,
+    channel=settings.slack_channel,
+    icon_url=settings.slack_icon_url,
+    username="SmartBot App Alerts",
     stack_trace=True,
-    username="SmartBot Alerts",
-    icon_url="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcToa29oI8p2lspzZr6QkUMvEIYcgSzCZurrUizGavSGSA&s",
+    fail_silent=False,
 )
 slack_handler.setLevel(logging.ERROR)
+logger.addHandler(slack_handler)

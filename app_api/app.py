@@ -50,13 +50,19 @@ async def post_stripe_webhook(request: Request):
             logger.info(f"Customer subscription updated: {subscription}")
             SubscriptionCRUD.update_subscription(subscription=subscription)
 
+        case "customer.subscription.deleted":
+            _subscription = event.data.object
+            subscription = CustomerSubscription(**_subscription)
+            logger.info(f"Customer subscription cancelled: {subscription}")
+            SubscriptionCRUD.update_subscription(subscription=subscription)
+
         case "invoice.paid":
             _invoice = event.data.object
             invoice = Invoice(**_invoice)
             logger.info(f"Invoice paid: {invoice}")
 
         case other:
-            logger.info(f"Unhandled event type: {other}")
+            logger.warning(f"Unhandled event type: {other}")
 
 
 @app.on_event("startup")

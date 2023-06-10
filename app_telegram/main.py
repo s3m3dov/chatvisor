@@ -4,7 +4,7 @@ import traceback
 
 from telegram import Update
 from telegram.constants import ParseMode
-from telegram.ext import ApplicationBuilder, Application, ContextTypes, CommandHandler
+from telegram.ext import ApplicationBuilder, Application, ContextTypes
 
 from core.config import settings
 from core.logging import logger
@@ -18,15 +18,11 @@ async def post_init(application: Application) -> None:
 
 async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Log the error and send a telegram message to notify the developer."""
-    # Log the error before we do anything else, so we can see it even if something breaks.
-    logger.error("Exception while handling an update:", exc_info=context.error)
-
-    # traceback.format_exception returns the usual python message about an exception, but as a
-    # list of strings rather than a single string, so we have to join them together.
     tb_list = traceback.format_exception(
         None, context.error, context.error.__traceback__
     )
-    tb_string = "".join(tb_list)
+    tb_string = "".join(tb_list)[-3000:]
+    logger.error("Exception while handling an update:", exc_info=tb_string)
 
     # Build the message with some markup and additional information about what happened.
     # You might need to add some logic to deal with messages longer than the 4096-character limit.
@@ -62,7 +58,7 @@ def start_bot() -> None:
         .build()
     )
     app.add_handlers(command_handlers)
-    app.add_handler(CommandHandler("bad_command", bad_command))
+    # app.add_handler(CommandHandler("bad_command", bad_command))
     app.add_error_handler(error_handler)
     logger.critical("Bot started!")
     app.run_polling()

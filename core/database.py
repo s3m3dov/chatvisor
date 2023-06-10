@@ -14,7 +14,6 @@ def create_session() -> scoped_session:
             echo=True,
             pool_pre_ping=True,
             pool_size=20,
-            pool_timeout=10,
             connect_args={"connect_timeout": 5},
         )
         _session = scoped_session(sessionmaker(bind=engine))

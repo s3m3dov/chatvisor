@@ -3,6 +3,7 @@ from telegram.constants import ChatType
 from telegram.ext import ContextTypes
 
 from core.config import settings
+from core.logging import logger
 from entities.enums import Platform
 from entities.schemas import TelegramUser
 from utils.user.checkout import CheckoutSessionCRUD
@@ -15,6 +16,8 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    logger.debug(f"Started app: {update.effective_user.username}")
+
     if update.effective_chat.type != ChatType.PRIVATE.value:
         await update.message.reply_text(
             "It's only possible to use this bot in private chats."
@@ -58,7 +61,7 @@ async def subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def manage_subscription(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
+        update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> None:
     _user = update.effective_user.to_dict()
     _chat = update.effective_chat.to_dict()

@@ -19,6 +19,7 @@ class TelegramConfig(BaseModel):
     """
 
     bot_token: str
+    developer_chat_id: int = 718361797
 
 
 class DBConfig(BaseModel):

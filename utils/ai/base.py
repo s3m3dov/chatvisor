@@ -5,9 +5,8 @@ from langchain.base_language import BaseLanguageModel
 from langchain.callbacks import get_openai_callback
 from langchain.prompts.prompt import PromptTemplate
 
+from core.logging import logger
 from utils.ai.constants import TEMPLATE
-
-log = print
 
 
 class BaseAgent:
@@ -33,7 +32,7 @@ class BaseAgent:
             prompt_tokens = cb.prompt_tokens
             completion_tokens = cb.completion_tokens
             total_cost = round(cb.total_cost, 6)
-            log(
+            logger.ino(
                 f"Total Tokens: {cb.total_tokens}\n"
                 f"Prompt Tokens: {prompt_tokens}\n"
                 f"Completion Tokens: {completion_tokens}\n"

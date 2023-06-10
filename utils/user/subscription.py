@@ -1,6 +1,7 @@
 import stripe
 
 from core.config import settings
+from core.logging import logger
 from entities.models import (
     User,
     CustomerSubscription as SubscriptionModel,
@@ -11,16 +12,12 @@ from entities.schemas import (
 
 stripe.api_key = settings.stripe.api_secret_key
 
-log = print
-
 
 class SubscriptionCRUD:
     @staticmethod
     def create_subscription(subscription: SubscriptionSchema):
-        user = User.where(
-           customer_id__exact=subscription.customer
-        ).first()
-        log(f"user: {user}")
+        user = User.where(customer_id__exact=subscription.customer).first()
+        logger.debug(f"user: {user}")
 
         SubscriptionModel.create(
             id=subscription.id,

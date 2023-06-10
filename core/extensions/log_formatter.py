@@ -13,8 +13,7 @@ class FormatterConfig(BaseModel):
 
     date_format: Optional[str] = "%Y-%m-%d %H:%M:%S"
     format: Optional[str] = (
-        "%(log_color)s%(asctime)s.%(msecs)03d [%(levelname)s] "
-        "(%(name)s) %(message)s"
+        "%(log_color)s%(asctime)s.%(msecs)03d [%(levelname)s] " "(%(name)s) %(message)s"
     )
     log_colors: Optional[dict] = {
         "DEBUG": "cyan",

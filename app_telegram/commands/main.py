@@ -3,10 +3,10 @@ from telegram.constants import ChatType
 from telegram.ext import ContextTypes
 
 from core.config import settings
-from utils.user.checkout import CheckoutSessionCRUD
-from utils.user.main import get_or_create_user_channel
 from entities.enums import Platform
 from entities.schemas import TelegramUser
+from utils.user.checkout import CheckoutSessionCRUD
+from utils.user.main import get_or_create_user_channel
 
 
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -27,7 +27,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         **_user, optional_data={"chat": _chat, "language_code": _user["language_code"]}
     )
 
-    is_created, user_channel = get_or_create_user_channel(platform=Platform.TELEGRAM, data=tg_user)
+    is_created, user_channel = get_or_create_user_channel(
+        platform=Platform.TELEGRAM, data=tg_user
+    )
     user = user_channel.user
     if is_created:
         await update.message.reply_text(f"Welcome, {user.full_name}!")
@@ -42,7 +44,9 @@ async def subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         **_user, optional_data={"chat": _chat, "language_code": _user["language_code"]}
     )
 
-    is_created, user_channel = get_or_create_user_channel(platform=Platform.TELEGRAM, data=tg_user)
+    is_created, user_channel = get_or_create_user_channel(
+        platform=Platform.TELEGRAM, data=tg_user
+    )
     is_subscribed, session = CheckoutSessionCRUD.create_checkout_session(
         user_channel.user
     )
@@ -62,7 +66,9 @@ async def manage_subscription(
         **_user, optional_data={"chat": _chat, "language_code": _user["language_code"]}
     )
 
-    is_created, user_channel = get_or_create_user_channel(platform=Platform.TELEGRAM, data=tg_user)
+    is_created, user_channel = get_or_create_user_channel(
+        platform=Platform.TELEGRAM, data=tg_user
+    )
     is_subscribed, session = CheckoutSessionCRUD.create_checkout_session(
         user_channel.user
     )

@@ -1,9 +1,8 @@
 from telegram.ext import ApplicationBuilder, Application
 
 from core.config import settings
+from core.logging import logger
 from .commands import command_handlers, command_info
-
-log = print
 
 
 async def post_init(application: Application) -> None:
@@ -12,7 +11,7 @@ async def post_init(application: Application) -> None:
 
 
 def start_bot() -> None:
-    log("Starting bot...")
+    logger.critical("Starting bot...")
     app = (
         ApplicationBuilder()
         .token(settings.telegram.bot_token)
@@ -20,5 +19,5 @@ def start_bot() -> None:
         .build()
     )
     app.add_handlers(command_handlers)
-    log("Bot started!")
+    logger.critical("Bot started!")
     app.run_polling()

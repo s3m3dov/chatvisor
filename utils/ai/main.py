@@ -2,10 +2,9 @@ from langchain.chat_models import ChatOpenAI
 
 from core.config import settings
 from core.config.submodels.main import LLMConfig
+from core.logging import logger
 from entities.models import UserChannel, PromptMessage, OutputMessage
 from .base import BaseAgent
-
-log = print
 
 __all__ = ["ChatBotOpenAI"]
 
@@ -46,7 +45,7 @@ class ChatBotOpenAI:
         return response
 
     async def save_prompt(
-            self, prompt: str, prompt_tokens: int, completion_tokens: int, cost: float
+        self, prompt: str, prompt_tokens: int, completion_tokens: int, cost: float
     ) -> PromptMessage:
         prompt_message = PromptMessage.create(
             text=prompt,
@@ -57,7 +56,7 @@ class ChatBotOpenAI:
             completion_tokens=completion_tokens,
             cost=cost,
         )
-        log(f"PromptMessage created: {prompt_message}")
+        logger.info(f"PromptMessage created: {prompt_message}")
         return prompt_message
 
     @staticmethod
@@ -66,4 +65,4 @@ class ChatBotOpenAI:
             text=output,
             prompt_id=prompt_message.id,
         )
-        log(f"PromptMessage created: {prompt_message}")
+        logger.info(f"PromptMessage created: {prompt_message}")

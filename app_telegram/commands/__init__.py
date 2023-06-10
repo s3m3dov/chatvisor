@@ -5,12 +5,7 @@ from .llm import (
     ask_gpt3_5_turbo,
     ask_gpt4,
 )
-from .main import (
-    start,
-    echo,
-    subscribe,
-    manage_subscription
-)
+from .main import start, echo, subscribe, manage_subscription
 
 command_handlers = [
     CommandHandler("start", start),

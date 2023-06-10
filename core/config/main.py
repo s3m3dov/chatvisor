@@ -1,4 +1,4 @@
-from dotenv import dotenv_values
+from environs import Env
 from pydantic import BaseSettings
 
 from core.config.submodels.main import (
@@ -10,17 +10,17 @@ from core.config.submodels.main import (
 )
 from entities.enums import SystemUser, Plan, PlanLimitDuration
 
-config = dotenv_values(".env")
+env = Env()
+env.read_env()
 
 
 class Config(BaseSettings):
     """Config class for settings."""
 
-    openapi_key: str = config["OPENAI_API_KEY"]
-    db_url: str = config["DATABASE_URL"]
-
+    openapi_key: str = env("OPENAI_API_KEY")
+    db_url: str = env("DATABASE_URL")
     telegram: TelegramConfig = TelegramConfig(
-        bot_token=config["TELEGRAM_BOT_TOKEN"],
+        bot_token=env("TELEGRAM_BOT_TOKEN"),
     )
     gpt3_5_turbo: LLMConfig = LLMConfig(
         name=SystemUser.GPT_3_5_TURBO,
@@ -43,16 +43,16 @@ class Config(BaseSettings):
         limit_duration=PlanLimitDuration.DAILY,
     )
     slack: SlackConfig = SlackConfig(
-        token=config["SLACK_TOKEN"],
-        channel=config["SLACK_CHANNEL"],
-        icon_url=config.get("SLACK_ICON_URL"),
+        token=env("SLACK_TOKEN"),
+        channel=env("SLACK_CHANNEL"),
+        icon_url=env("SLACK_ICON_URL", None),
     )
     stripe: StripeConfig = StripeConfig(
-        api_pub_key=config["STRIPE_API_PUBLISHABLE_KEY"],
-        api_secret_key=config["STRIPE_API_SECRET_KEY"],
-        webhook_secret=config["STRIPE_WEBHOOK_SECRET"],
-        success_url=config["STRIPE_SUCCESS_URL"],
-        dashboard_url=config["STRIPE_DASHBOARD_URL"],
-        price_id=config["STRIPE_PRICE_ID"],
-        trial_period_days=config["STRIPE_TRIAL_PERIOD_DAYS"],
+        api_pub_key=env["STRIPE_API_PUBLISHABLE_KEY"],
+        api_secret_key=env["STRIPE_API_SECRET_KEY"],
+        webhook_secret=env["STRIPE_WEBHOOK_SECRET"],
+        success_url=env["STRIPE_SUCCESS_URL"],
+        dashboard_url=env["STRIPE_DASHBOARD_URL"],
+        price_id=env["STRIPE_PRICE_ID"],
+        trial_period_days=env.int["STRIPE_TRIAL_PERIOD_DAYS"],
     )

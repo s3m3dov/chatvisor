@@ -1,4 +1,4 @@
-from telegram import Update
+from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.constants import ChatType
 from telegram.ext import ContextTypes
 
@@ -52,7 +52,19 @@ async def subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if is_subscribed:
         await update.message.reply_text("You are already subscribed, enjoy!")
     else:
-        await update.message.reply_text(f"You can subscribe here: {session.url}")
+        await update.message.reply_text(
+            "You are not subscribed yet, please subscribe here",
+            reply_markup=InlineKeyboardMarkup(
+                [
+                    [
+                        InlineKeyboardButton(
+                            text="Subscribe",
+                            url=session.url,
+                        )
+                    ]
+                ]
+            ),
+        )
 
 
 async def manage_subscription(
@@ -73,11 +85,31 @@ async def manage_subscription(
 
     if is_subscribed:
         await update.message.reply_text(
-            f"Manage your subscription here: {settings.stripe.dashboard_url}"
+            "Manage your subscription here",
+            reply_markup=InlineKeyboardMarkup(
+                [
+                    [
+                        InlineKeyboardButton(
+                            text="Subscription Dashboard",
+                            url=settings.stripe.dashboard_url,
+                        )
+                    ]
+                ]
+            ),
         )
     else:
         await update.message.reply_text(
-            f"You are not subscribed yet, please subscribe here: {session.url}"
+            "You are not subscribed yet, please subscribe here",
+            reply_markup=InlineKeyboardMarkup(
+                [
+                    [
+                        InlineKeyboardButton(
+                            text="Subscribe",
+                            url=session.url,
+                        )
+                    ]
+                ]
+            ),
         )
 
 

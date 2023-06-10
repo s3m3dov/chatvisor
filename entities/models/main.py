@@ -82,7 +82,7 @@ class PromptMessage(BaseModel):
     cost: Mapped[Optional[float]] = mapped_column(
         Float(precision=8), nullable=False
     )  # in USD
-    openai_embedding: Mapped[Optional[Vector]] = mapped_column(Vector, nullable=True)
+    # openai_embedding: Mapped[Optional[Vector]] = mapped_column(Vector, nullable=True)
     created_at: Mapped[int] = mapped_column(
         Integer, nullable=False, default=pendulum.now("UTC").int_timestamp
     )
@@ -110,7 +110,7 @@ class OutputMessage(BaseModel):
         Integer, primary_key=True, nullable=False, autoincrement=True
     )
     text: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    openai_embedding: Mapped[Optional[Vector]] = mapped_column(Vector, nullable=True)
+    # openai_embedding: Mapped[Optional[Vector]] = mapped_column(Vector, nullable=True)
     created_at: Mapped[int] = mapped_column(
         Integer, nullable=False, default=pendulum.now("UTC").int_timestamp
     )

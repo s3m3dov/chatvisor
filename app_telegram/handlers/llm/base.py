@@ -6,15 +6,13 @@ from core.logging import logger
 from entities.enums import Platform
 from entities.schemas import TelegramUser
 from utils.ai.main import ChatBotOpenAI
-from utils.user.checkout import CheckoutSessionCRUD
 from utils.user.main import get_or_create_user_channel
-from utils.user.plan import PlanLogic
+from utils.user.plan import UserPlan
 
 __all__ = ["base_openai_ask", "base_openai_command"]
 
 
 async def base_openai_ask(update: Update, llm_config: LLMConfig, text: str) -> None:
-    await update.message.reply_text("Thinking..., this might take a while")
     _user = update.effective_user.to_dict()
     _chat = update.effective_chat.to_dict()
     tg_user = TelegramUser(
@@ -25,9 +23,9 @@ async def base_openai_ask(update: Update, llm_config: LLMConfig, text: str) -> N
         platform=Platform.TELEGRAM, data=tg_user
     )
 
-    plan_logic = PlanLogic(user_id=user_channel.user_id, channel_id=user_channel.id)
-    if plan_logic.is_plan_limit_reached():
-        is_subscribed, session = CheckoutSessionCRUD.create_checkout_session(
+    user_plan = UserPlan(user_id=user_channel.user_id, channel_id=user_channel.id)
+    if user_plan.is_plan_limit_reached():
+        is_subscribed, session = user_plan.create_checkout_session(
             user_channel.user
         )
         if is_subscribed:
@@ -48,6 +46,7 @@ async def base_openai_ask(update: Update, llm_config: LLMConfig, text: str) -> N
             )
         return
 
+    await update.message.reply_text("Thinking..., this might take a while")
     openai_llm = ChatBotOpenAI(user_channel=user_channel, llm_config=llm_config)
     response = await openai_llm.ask(question=text)
     await update.message.reply_text(response)

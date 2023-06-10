@@ -10,7 +10,7 @@ __all__ = ["session"]
 def create_session() -> scoped_session:
     try:
         engine = create_engine(
-            settings.db.uri,
+            settings.db_url,
             echo=True,
             pool_pre_ping=True,
             pool_size=20,

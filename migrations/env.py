@@ -13,7 +13,7 @@ config = context.config
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 if config.config_file_name is not None:
-    config.set_main_option("sqlalchemy.url", settings.db.uri)
+    config.set_main_option("sqlalchemy.url", settings.db_url)
     fileConfig(config.config_file_name)
 
 # Model / Schema imports

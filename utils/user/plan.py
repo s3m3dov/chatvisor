@@ -1,6 +1,7 @@
-from typing import Optional
+from typing import Optional, Tuple
 
 import pendulum
+import stripe
 from sqlalchemy import func
 
 from core.config import settings
@@ -9,11 +10,21 @@ from core.database import session
 from core.logging import logger
 from entities.enums import SubscriptionStatus, PlanLimitDuration
 from entities.models import CustomerSubscription, PromptMessage
+from entities.models import (
+    User,
+)
+from entities.schemas import (
+    CheckoutSession,
+)
+
+__all__ = ["UserPlan"]
+stripe.api_key = settings.stripe.api_secret_key
 
 
-class PlanLogic:
+class UserPlan:
     def __init__(self, user_id: str, channel_id: int) -> None:
         self.user_id = user_id
+        self.subscription = self.get_subscription(user_id)
         self.channel_id = channel_id
         self.plan = self.get_current_plan()
 
@@ -26,17 +37,16 @@ class PlanLogic:
         logger.debug(f"Subscription: {subscription}")
         return subscription
 
-    @staticmethod
-    def is_premium(subscription: Optional[CustomerSubscription]) -> bool:
-        if subscription:
-            logger.debug(f"Subscription status: {subscription.status}")
-            return SubscriptionStatus.is_active(subscription.status)
+    @property
+    def is_premium(self) -> bool:
+        if self.subscription:
+            logger.debug(f"Subscription status: {self.subscription.status}")
+            return SubscriptionStatus.is_active(self.subscription.status)
 
         return False
 
     def get_current_plan(self) -> PlanConfig:
-        subscription = self.get_subscription(self.user_id)
-        if subscription and self.is_premium(subscription):
+        if self.is_premium:
             logger.info(f"User {self.user_id} is premium")
             return settings.premium_plan
         else:
@@ -93,3 +103,42 @@ class PlanLogic:
             .scalar()
         )
         return usage or 0
+
+    def create_checkout_session(
+            self, user: User
+    ) -> Tuple[bool, Optional[CheckoutSession]]:
+        """Get an employee.
+        Args:
+            user (User): The internal user + stripe customer.
+
+        Returns:
+            bool: True if the user is subscribed.
+            CheckoutSession: The checkout session if user is not subscribed.
+        """
+        if self.is_premium:
+            return True, None
+        else:
+            _session = self._create_checkout_session(user=user)
+            return False, _session
+
+    @staticmethod
+    def _create_checkout_session(user: User) -> CheckoutSession:
+        _session: stripe.checkout.Session = stripe.checkout.Session.create(
+            customer=user.customer_id,
+            metadata={"user_id": user.id},
+            mode="subscription",
+            payment_method_types=["card"],
+            currency=settings.stripe.currency,
+            success_url=settings.stripe.success_url,
+            phone_number_collection={
+                "enabled": settings.stripe.phone_number_collection_enabled,
+            },
+            line_items=[
+                {"price": settings.stripe.price_id, "quantity": 1},
+            ],
+            subscription_data={
+                "trial_settings": {"end_behavior": {"missing_payment_method": "pause"}},
+                "trial_period_days": settings.stripe.trial_period_days,
+            },
+        )
+        return CheckoutSession(**_session)

@@ -6,8 +6,8 @@ from core.config import settings
 from core.logging import logger
 from entities.enums import Platform
 from entities.schemas import TelegramUser
-from utils.user.checkout import CheckoutSessionCRUD
 from utils.user.main import get_or_create_user_channel
+from utils.user.plan import UserPlan
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -45,9 +45,8 @@ async def subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     is_created, user_channel = get_or_create_user_channel(
         platform=Platform.TELEGRAM, data=tg_user
     )
-    is_subscribed, session = CheckoutSessionCRUD.create_checkout_session(
-        user_channel.user
-    )
+    user_plan = UserPlan(user_id=user_channel.user_id, channel_id=user_channel.id)
+    is_subscribed, session = user_plan.create_checkout_session(user_channel.user)
 
     if is_subscribed:
         await update.message.reply_text("You are already subscribed, enjoy!")
@@ -68,7 +67,7 @@ async def subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def manage_subscription(
-        update: Update, context: ContextTypes.DEFAULT_TYPE
+    update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> None:
     _user = update.effective_user.to_dict()
     _chat = update.effective_chat.to_dict()
@@ -79,9 +78,8 @@ async def manage_subscription(
     is_created, user_channel = get_or_create_user_channel(
         platform=Platform.TELEGRAM, data=tg_user
     )
-    is_subscribed, session = CheckoutSessionCRUD.create_checkout_session(
-        user_channel.user
-    )
+    user_plan = UserPlan(user_id=user_channel.user_id, channel_id=user_channel.id)
+    is_subscribed, session = user_plan.create_checkout_session(user_channel.user)
 
     if is_subscribed:
         await update.message.reply_text(

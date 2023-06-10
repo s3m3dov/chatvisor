@@ -57,3 +57,13 @@ async def post_stripe_webhook(request: Request):
 
         case other:
             logger.info(f"Unhandled event type: {other}")
+
+
+@app.on_event("startup")
+async def startup_event():
+    logger.critical("FastAPI App Started")
+
+
+@app.on_event("shutdown")
+async def startup_event():
+    logger.critical("FastAPI App Stopped")

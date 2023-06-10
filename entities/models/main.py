@@ -79,7 +79,9 @@ class PromptMessage(BaseModel):
     text: Mapped[Optional[str]] = mapped_column(String, nullable=False)
     prompt_tokens: Mapped[Optional[int]] = mapped_column(Integer, nullable=False)
     completion_tokens: Mapped[Optional[int]] = mapped_column(Integer, nullable=False)
-    cost: Mapped[Optional[float]] = mapped_column(Float(precision=8), nullable=False)  # in USD
+    cost: Mapped[Optional[float]] = mapped_column(
+        Float(precision=8), nullable=False
+    )  # in USD
     openai_embedding: Mapped[Optional[Vector]] = mapped_column(Vector, nullable=True)
     created_at: Mapped[int] = mapped_column(
         Integer, nullable=False, default=pendulum.now("UTC").int_timestamp

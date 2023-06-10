@@ -2,11 +2,11 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 from core.config import settings
+from entities.enums import Platform
+from entities.schemas import TelegramUser
 from utils.ai.main import ChatBotOpenAI
 from utils.user.main import get_or_create_user_channel
 from utils.user.plan import PlanLogic
-from entities.enums import Platform
-from entities.schemas import TelegramUser
 
 
 async def ask_gpt3_5_turbo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -23,7 +23,9 @@ async def ask_gpt3_5_turbo(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         **_user, optional_data={"chat": _chat, "language_code": _user["language_code"]}
     )
 
-    is_created, user_channel = get_or_create_user_channel(platform=Platform.TELEGRAM, data=tg_user)
+    is_created, user_channel = get_or_create_user_channel(
+        platform=Platform.TELEGRAM, data=tg_user
+    )
     plan_logic = PlanLogic(user_id=user_channel.user_id, channel_id=user_channel.id)
     if plan_logic.is_plan_limit_reached():
         await update.message.reply_text(
@@ -52,7 +54,9 @@ async def ask_gpt4(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         **_user, optional_data={"chat": _chat, "language_code": _user["language_code"]}
     )
 
-    is_created, user_channel = get_or_create_user_channel(platform=Platform.TELEGRAM, data=tg_user)
+    is_created, user_channel = get_or_create_user_channel(
+        platform=Platform.TELEGRAM, data=tg_user
+    )
     plan_logic = PlanLogic(user_id=user_channel.user_id, channel_id=user_channel.id)
     if plan_logic.is_plan_limit_reached():
         await update.message.reply_text(

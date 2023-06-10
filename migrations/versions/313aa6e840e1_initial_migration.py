@@ -74,6 +74,7 @@ def upgrade() -> None:
         sa.Column("openai_embedding", pgvector.sqlalchemy.Vector(), nullable=True),
         sa.Column("channel_id", sa.Integer(), nullable=False),
         sa.Column("sender_id", sa.UUID(), nullable=False),
+        sa.Column("created_at", sa.Integer(), nullable=True),
         sa.Column(
             "receiver_id",
             sa.Enum("SYSTEM", "GPT_3_5_TURBO", "GPT_4", "DALL_E", name="system_user"),
@@ -95,6 +96,7 @@ def upgrade() -> None:
         sa.Column("text", sa.String(), nullable=True),
         sa.Column("openai_embedding", pgvector.sqlalchemy.Vector(), nullable=True),
         sa.Column("prompt_id", sa.Integer(), nullable=False),
+        sa.Column("created_at", sa.Integer(), nullable=True),
         sa.ForeignKeyConstraint(
             ["prompt_id"],
             ["prompt_messages.id"],

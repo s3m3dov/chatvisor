@@ -5,7 +5,6 @@ Revises:
 Create Date: 2023-06-04 16:12:30.279973
 
 """
-import pgvector
 import sqlalchemy as sa
 from alembic import op
 
@@ -71,7 +70,6 @@ def upgrade() -> None:
         sa.Column("prompt_tokens", sa.Integer(), nullable=False),
         sa.Column("completion_tokens", sa.Integer(), nullable=False),
         sa.Column("cost", sa.Float(precision=8), nullable=False),
-        sa.Column("openai_embedding", pgvector.sqlalchemy.Vector(), nullable=True),
         sa.Column("channel_id", sa.Integer(), nullable=False),
         sa.Column("sender_id", sa.UUID(), nullable=False),
         sa.Column("created_at", sa.Integer(), nullable=True),
@@ -94,7 +92,6 @@ def upgrade() -> None:
         "output_messages",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column("text", sa.String(), nullable=True),
-        sa.Column("openai_embedding", pgvector.sqlalchemy.Vector(), nullable=True),
         sa.Column("prompt_id", sa.Integer(), nullable=False),
         sa.Column("created_at", sa.Integer(), nullable=True),
         sa.ForeignKeyConstraint(

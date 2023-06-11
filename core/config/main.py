@@ -48,11 +48,11 @@ class Config(BaseSettings):
         icon_url=env("SLACK_ICON_URL", None),
     )
     stripe: StripeConfig = StripeConfig(
-        api_pub_key=env["STRIPE_API_PUBLISHABLE_KEY"],
-        api_secret_key=env["STRIPE_API_SECRET_KEY"],
-        webhook_secret=env["STRIPE_WEBHOOK_SECRET"],
-        success_url=env["STRIPE_SUCCESS_URL"],
-        dashboard_url=env["STRIPE_DASHBOARD_URL"],
-        price_id=env["STRIPE_PRICE_ID"],
-        trial_period_days=env.int["STRIPE_TRIAL_PERIOD_DAYS"],
+        api_pub_key=env("STRIPE_API_PUBLISHABLE_KEY"),
+        api_secret_key=env("STRIPE_API_SECRET_KEY"),
+        webhook_secret=env("STRIPE_WEBHOOK_SECRET"),
+        success_url=env("STRIPE_SUCCESS_URL"),
+        dashboard_url=env("STRIPE_DASHBOARD_URL"),
+        price_id=env("STRIPE_PRICE_ID"),
+        trial_period_days=env.int("STRIPE_TRIAL_PERIOD_DAYS"),
     )

@@ -19,5 +19,9 @@ RUN pip install poetry --cache-dir /tmp/pip-cache && \
 # Copy app code
 COPY . /app/
 
+# Copy and set permissions for the entrypoint script
+COPY entrypoint.sh /app/
+RUN chmod +x /app/entrypoint.sh
+
 # Run entrypoint shell script
-CMD ["entrypoint.sh"]
+ENTRYPOINT ["/app/entrypoint.sh"]

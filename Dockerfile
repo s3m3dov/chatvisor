@@ -19,5 +19,5 @@ RUN pip install poetry --cache-dir /tmp/pip-cache && \
 # Copy app code
 COPY . /app/
 
-# Run migrations
-RUN poetry run alembic upgrade head
+# Run entrypoint shell script
+CMD ["entrypoint.sh"]

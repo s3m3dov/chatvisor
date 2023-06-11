@@ -1,6 +1,9 @@
 import stripe
+from fastapi import status
 from fastapi.applications import FastAPI
+from fastapi.exceptions import HTTPException
 from fastapi.requests import Request
+from starlette.responses import JSONResponse
 from stripe.error import SignatureVerificationError
 
 from core.config import settings
@@ -23,12 +26,23 @@ async def post_stripe_webhook(request: Request):
             sig_header=sig_header,
             secret=settings.stripe.webhook_secret,
         )
-    except ValueError as e:
-        # Invalid payload
-        return e
-    except SignatureVerificationError as e:
+    except ValueError as exc:
+        logger.error(f"Error while decoding event! {exc}", exc_info=exc)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Error while decoding event"
+        )
+    except SignatureVerificationError as exc:
+        logger.error(f"Invalid signature! {exc}", exc_info=exc)
         # Invalid signature
-        return e
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Signature"
+        )
+    except Exception as exc:
+        logger.error(f"Unhandled exception: {exc}", exc_info=exc)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Unhandled Exception"
+        )
 
     # Handle the event
     match event.type:
@@ -73,3 +87,11 @@ async def startup_event():
 @app.on_event("shutdown")
 async def startup_event():
     logger.critical("FastAPI App Stopped")
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"intent": "error", "message": exc.detail, "detail": None},
+    )

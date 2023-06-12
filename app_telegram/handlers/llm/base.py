@@ -2,7 +2,6 @@ from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ContextTypes
 
 from core.config.submodels.main import LLMConfig
-from core.logging import logger
 from entities.enums import Platform
 from entities.schemas import TelegramUser
 from utils.ai.main import ChatBotOpenAI
@@ -25,11 +24,11 @@ async def base_openai_ask(update: Update, llm_config: LLMConfig, text: str) -> N
 
     user_plan = UserPlan(user_id=user_channel.user_id, channel_id=user_channel.id)
     if user_plan.is_plan_limit_reached():
-        is_subscribed, session = user_plan.create_checkout_session(
-            user_channel.user
-        )
+        is_subscribed, session = user_plan.create_checkout_session(user_channel.user)
         if is_subscribed:
-            await update.message.reply_text("You have reached your plan limit. Try again later.")
+            await update.message.reply_text(
+                "You have reached your plan limit. Try again later."
+            )
         else:
             await update.message.reply_text(
                 "Upgrade to the premium plan if you don't want limits to hold you back!",
@@ -53,9 +52,8 @@ async def base_openai_ask(update: Update, llm_config: LLMConfig, text: str) -> N
 
 
 async def base_openai_command(
-        update: Update, context: ContextTypes.DEFAULT_TYPE, llm_config: LLMConfig
+    update: Update, context: ContextTypes.DEFAULT_TYPE, llm_config: LLMConfig
 ) -> None:
-    logger.debug(update.message.text)
     if not context.args:
         await update.message.reply_text(
             "You haven't entered a prompt. " "E.g., `/[command] <question>`"

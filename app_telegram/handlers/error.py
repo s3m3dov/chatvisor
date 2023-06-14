@@ -7,8 +7,10 @@ from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 
 from core.config import settings
-from core.database import session
+# from core.database import session
 from core.logging import logger
+from entities.enums import SystemUser
+from entities.models import PromptMessage
 
 
 async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -18,7 +20,7 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> N
     )
     tb_string = "".join(tb_list)[-3000:]
     logger.error("Exception while handling an update:", exc_info=tb_string)
-    session.rollback()
+    # session.rollback()
 
     # Build the message with some markup and additional information about what happened.
     # You might need to add some logic to deal with messages longer than the 4096-character limit.
@@ -43,3 +45,15 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> N
 async def bad_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Raise an error to trigger the error handler."""
     await context.bot.wrong_method_name()  # type: ignore[attr-defined]
+
+
+async def bad_command_2(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    PromptMessage.create(
+        text=1236372687423788172638764817238912,
+        sender_id=None,
+        receiver_id=SystemUser.SYSTEM,
+        channel_id="nksdgbaiub",
+        prompt_tokens="sadion",
+        completion_tokens="sadd",
+        cost="sda",
+    )

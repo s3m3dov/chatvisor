@@ -14,6 +14,9 @@ class SystemUser(StrEnum, BaseEnum):
     GPT_4 = "gpt-4"
     DALL_E = "dall-e"
 
+    def is_llm(self) -> bool:
+        return self in [SystemUser.GPT_3_5_TURBO, SystemUser.GPT_4]
+
 
 class PlanLimitDuration(StrEnum, BaseEnum):
     LIFETIME = "lifetime"

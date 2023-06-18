@@ -3,6 +3,7 @@ from pydantic import BaseSettings
 
 from core.config.submodels.main import (
     LLMConfig,
+    ImageGenConfig,
     TelegramConfig,
     SlackConfig,
     StripeConfig,
@@ -31,6 +32,11 @@ class Config(BaseSettings):
         name=SystemUser.GPT_4,
         temperature=0.3,
         max_tokens=450,
+    )
+    dalle: ImageGenConfig = ImageGenConfig(
+        name=SystemUser.DALL_E,
+        resolution="1024x1024",
+        price=0.020
     )
     basic_plan: PlanConfig = PlanConfig(
         name=Plan.BASIC,

@@ -6,7 +6,7 @@ from sqlalchemy import func
 
 from core.config import settings
 from core.config.submodels.main import PlanConfig
-from core.database import session
+from core.database import session_scope
 from core.logging import logger
 from entities.enums import SubscriptionStatus, PlanLimitDuration
 from entities.models import CustomerSubscription, PromptMessage
@@ -86,26 +86,29 @@ class UserPlan:
 
     def get_daily_usage(self) -> float:
         earlier_by_24h = pendulum.now("UTC").subtract(days=1).int_timestamp
-        usage = (
-            session.query(func.sum(PromptMessage.cost).label("usage"))
-            .filter(
-                PromptMessage.channel_id == self.channel_id,
-                PromptMessage.created_at >= earlier_by_24h,
+        with session_scope() as session:
+            usage = (
+                session.query(func.sum(PromptMessage.cost).label("usage"))
+                .filter(
+                    PromptMessage.channel_id == self.channel_id,
+                    PromptMessage.created_at >= earlier_by_24h,
+                )
+                .scalar()
             )
-            .scalar()
-        )
         return usage or 0
 
     def get_lifetime_usage(self) -> float:
-        usage = (
-            session.query(func.sum(PromptMessage.cost).label("usage"))
-            .filter(PromptMessage.channel_id == self.channel_id)
-            .scalar()
-        )
+        with session_scope() as session:
+            usage = (
+                session.query(func.sum(PromptMessage.cost).label("usage"))
+                .filter(PromptMessage.channel_id == self.channel_id)
+                .scalar()
+            )
+
         return usage or 0
 
     def create_checkout_session(
-            self, user: User
+        self, user: User
     ) -> Tuple[bool, Optional[CheckoutSession]]:
         """Get an employee.
         Args:

@@ -1,7 +1,7 @@
 from telegram import BotCommand
 from telegram.ext import CommandHandler, filters, MessageHandler
 
-from .error import error_handler, bad_command
+from .error import error_handler
 from .general import start, echo, subscribe, manage_subscription
 from .llm import ask_gpt3_5_turbo, ask_gpt4, ask_default
 from .llm.base import base_openai_ask
@@ -17,7 +17,6 @@ command_handlers = [
     CommandHandler("dalle", ask_dalle),
     CommandHandler("echo", echo),
     CommandHandler("manage_subscription", manage_subscription),
-    # CommandHandler("bad_command", bad_command),
 ]
 command_info = [
     BotCommand("start", "Start the bot"),

@@ -64,6 +64,12 @@ class LLMConfig(BaseModel):
     max_tokens: int = 300
 
 
+class ImageGenConfig(BaseModel):
+    name: SystemUser
+    resolution: str = "1024x1024"
+    price: float = 0.020  # by USD
+
+
 class PlanConfig(BaseModel):
     """
     Config for Plan

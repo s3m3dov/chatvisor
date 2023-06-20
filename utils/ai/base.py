@@ -1,11 +1,18 @@
-from typing import Tuple
+from typing import Tuple, List, Optional
 
 from langchain import ConversationChain
 from langchain.base_language import BaseLanguageModel
 from langchain.callbacks import get_openai_callback
-from langchain.memory import ConversationSummaryBufferMemory
+from langchain.chat_models import ChatOpenAI
+from langchain.memory import (
+    ConversationSummaryBufferMemory,
+    ChatMessageHistory,
+)
 from langchain.prompts import PromptTemplate
+from langchain.schema import BaseMessage
 
+from core.config import settings
+from core.config.submodels.main import LLMConfig
 from core.logging import logger
 from utils.ai.constants import TEMPLATE
 
@@ -16,17 +23,48 @@ class BaseChatAgent:
     to generate responses to prompts.
     """
 
-    def __init__(self, llm: BaseLanguageModel) -> None:
-        # self.embeddings = OpenAIEmbeddings()
-        self.engine = ConversationChain(
-            llm=llm,
+    def __init__(
+        self, llm_config: LLMConfig, messages: Optional[List[BaseMessage]]
+    ) -> None:
+        self.llm = self._init_llm(llm_config)
+        self.memory = self._init_memory(messages)
+        self.engine = self._init_chain()
+
+    @staticmethod
+    def _init_llm(llm_config: LLMConfig) -> BaseLanguageModel:
+        llm = ChatOpenAI(
+            openai_api_key=settings.openapi_key,
+            model_name=llm_config.name.value,
+            max_tokens=llm_config.max_tokens,
+            temperature=llm_config.temperature,
+        )
+        return llm
+
+    def _init_memory(
+        self, messages: Optional[List[BaseMessage]]
+    ) -> Optional[ConversationSummaryBufferMemory]:
+        if not messages:
+            return None
+        logger.debug("Messages: %s", messages)
+        memory = ConversationSummaryBufferMemory(
+            llm=self.llm,
+            chat_memory=ChatMessageHistory(messages=messages),
+            max_token_limit=650,
+            max_history_length=5,
+        )
+        return memory
+
+    def _init_chain(self) -> ConversationChain:
+        chain = ConversationChain(
+            llm=self.llm,
+            memory=self.memory,
+            verbose=True,
             prompt=PromptTemplate(
                 input_variables=["history", "input"],
                 template=TEMPLATE,
             ),
-            memory=ConversationSummaryBufferMemory(llm=llm, max_token_limit=650),
-            verbose=True,
         )
+        return chain
 
     def predict(self, *args, **kwargs) -> Tuple[str, int, int, float]:
         with get_openai_callback() as cb:
@@ -35,10 +73,14 @@ class BaseChatAgent:
             completion_tokens = cb.completion_tokens
             total_cost = round(cb.total_cost, 4)
             logger.info(
-                f"Total Tokens: {cb.total_tokens}\n"
-                f"Prompt Tokens: {prompt_tokens}\n"
-                f"Completion Tokens: {completion_tokens}\n"
-                f"Total Cost (USD): ${cb.total_cost}\n"
+                "Total Tokens: %d\n"
+                "Prompt Tokens: %d\n"
+                "Completion Tokens: %d\n"
+                "Total Cost (USD): $%.4f\n",
+                cb.total_tokens,
+                prompt_tokens,
+                completion_tokens,
+                cb.total_cost,
             )
 
         return result, prompt_tokens, completion_tokens, total_cost

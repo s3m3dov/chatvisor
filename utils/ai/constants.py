@@ -12,5 +12,5 @@ Relevant pieces of previous conversation:
 
 Current conversation:
 Human: {input}
-Smart Assistant:
+AI:
 """

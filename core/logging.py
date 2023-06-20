@@ -22,6 +22,6 @@ slack_handler = SlackLogHandler(
     fail_silent=False,
 )
 slack_handler.setLevel(logging.ERROR)
-logger.addHandler(slack_handler)
+# logger.addHandler(slack_handler)
 
 logger.setLevel(logging.DEBUG)

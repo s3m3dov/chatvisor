@@ -13,9 +13,13 @@ class SystemUser(StrEnum, BaseEnum):
     GPT_3_5_TURBO = "gpt-3.5-turbo"
     GPT_4 = "gpt-4"
     DALL_E = "dall-e"
+    
+    @classmethod
+    def get_llms(cls) -> tuple:
+        return cls.GPT_3_5_TURBO, cls.GPT_4
 
     def is_llm(self) -> bool:
-        return self in [SystemUser.GPT_3_5_TURBO, SystemUser.GPT_4]
+        return self in self.get_llms()
 
 
 class PlanLimitDuration(StrEnum, BaseEnum):

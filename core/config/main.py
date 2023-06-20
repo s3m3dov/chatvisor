@@ -20,7 +20,7 @@ class Config(BaseSettings):
 
     openapi_key: str = env("OPENAI_API_KEY")
     db_url: str = env("DATABASE_URL")
-    limit: int = env.int("LIMIT", default=20)
+    limit: int = env.int("LIMIT", default=10)
     telegram: TelegramConfig = TelegramConfig(
         bot_token=env("TELEGRAM_BOT_TOKEN"),
     )

@@ -1,8 +1,12 @@
-from langchain.chat_models import ChatOpenAI
+from typing import List
+
+from langchain.schema import BaseMessage, HumanMessage, AIMessage
 
 from core.config import settings
 from core.config.submodels.main import LLMConfig
+from core.database import session_scope
 from core.logging import logger
+from entities.enums import SystemUser
 from entities.models import UserChannel, PromptMessage, OutputMessage
 from .base import BaseChatAgent
 
@@ -16,23 +20,16 @@ class ChatBotOpenAI:
     """
 
     def __init__(self, user_channel: UserChannel, llm_config: LLMConfig):
-        self.llm_config = llm_config
-        self.bot = BaseChatAgent(llm=self.init_llm())
         self.user_channel = user_channel
-
-    def init_llm(self) -> ChatOpenAI:
-        llm = ChatOpenAI(
-            openai_api_key=settings.openapi_key,
-            model_name=self.llm_config.name.value,
-            max_tokens=self.llm_config.max_tokens,
-            temperature=self.llm_config.temperature,
+        self.llm_config = llm_config
+        self.bot = BaseChatAgent(
+            llm_config=llm_config,
+            messages=self.get_chat_history(),
         )
-        return llm
 
     async def ask(self, question: str) -> str:
         response, prompt_tokens, completion_tokens, cost = self.bot.predict(
-            input=question,
-            history=None,
+            input=question
         )
         prompt_message = await self.save_prompt(
             prompt=question,
@@ -65,4 +62,25 @@ class ChatBotOpenAI:
             text=output,
             prompt_id=prompt_message.id,
         )
-        logger.info(f"PromptMessage created: {prompt_message}")
+
+    def get_chat_history(self) -> List[BaseMessage]:
+        _messages = self._get_messages_from_db()
+        messages = []
+        for _msg in _messages[::-1]:
+            messages.append(HumanMessage(content=_msg[0]))
+            messages.append(AIMessage(content=_msg[1]))
+        return messages
+
+    def _get_messages_from_db(self) -> str:
+        with session_scope() as session:
+            messages = (
+                session.query(PromptMessage.text, OutputMessage.text)
+                .join(OutputMessage, PromptMessage.id == OutputMessage.prompt_id)
+                .filter(
+                    PromptMessage.receiver_id.in_(SystemUser.get_llms()),
+                    PromptMessage.sender_id == self.user_channel.user_id,
+                )
+                .order_by(PromptMessage.created_at.desc(), PromptMessage.id.desc())
+                .limit(settings.limit)
+            )
+            return messages

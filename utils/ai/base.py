@@ -8,6 +8,7 @@ from langchain.memory import (
     ConversationSummaryBufferMemory,
     ChatMessageHistory,
 )
+from langchain.memory.chat_memory import BaseChatMemory
 from langchain.prompts import PromptTemplate
 from langchain.schema import BaseMessage
 
@@ -26,6 +27,7 @@ class BaseChatAgent:
     def __init__(
         self, llm_config: LLMConfig, messages: Optional[List[BaseMessage]]
     ) -> None:
+        self.llm_config = llm_config
         self.llm = self._init_llm(llm_config)
         self.memory = self._init_memory(messages)
         self.engine = self._init_chain()
@@ -42,7 +44,7 @@ class BaseChatAgent:
 
     def _init_memory(
         self, messages: Optional[List[BaseMessage]]
-    ) -> Optional[ConversationSummaryBufferMemory]:
+    ) -> Optional[BaseChatMemory]:
         if not messages:
             return None
         logger.debug("Messages: %s", messages)
@@ -50,7 +52,6 @@ class BaseChatAgent:
             llm=self.llm,
             chat_memory=ChatMessageHistory(messages=messages),
             max_token_limit=650,
-            max_history_length=5,
         )
         return memory
 

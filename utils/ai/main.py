@@ -4,7 +4,7 @@ from core.config import settings
 from core.config.submodels.main import LLMConfig
 from core.logging import logger
 from entities.models import UserChannel, PromptMessage, OutputMessage
-from .base import BaseAgent
+from .base import BaseChatAgent
 
 __all__ = ["ChatBotOpenAI"]
 
@@ -17,7 +17,7 @@ class ChatBotOpenAI:
 
     def __init__(self, user_channel: UserChannel, llm_config: LLMConfig):
         self.llm_config = llm_config
-        self.bot = BaseAgent(llm=self.init_llm())
+        self.bot = BaseChatAgent(llm=self.init_llm())
         self.user_channel = user_channel
 
     def init_llm(self) -> ChatOpenAI:

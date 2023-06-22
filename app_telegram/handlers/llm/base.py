@@ -10,12 +10,13 @@ __all__ = ["base_openai_ask", "base_openai_command"]
 
 async def base_openai_ask(update: Update, llm_config: LLMConfig, text: str) -> None:
     is_created, user_channel = get_or_create_user_tg_channel(update)
-    await is_plan_limit_reached(update, user_channel)
+    is_limit_reached = await is_plan_limit_reached(update, user_channel)
 
-    await update.message.reply_text("Thinking...")
-    openai_llm = ChatBotOpenAI(user_channel=user_channel, llm_config=llm_config)
-    response = await openai_llm.ask(question=text)
-    await update.message.reply_text(response)
+    if not is_limit_reached:
+        await update.message.reply_text("Thinking...")
+        openai_llm = ChatBotOpenAI(user_channel=user_channel, llm_config=llm_config)
+        response = await openai_llm.ask(question=text)
+        await update.message.reply_text(response)
 
 
 async def base_openai_command(

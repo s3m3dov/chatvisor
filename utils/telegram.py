@@ -31,7 +31,7 @@ def get_or_create_user_tg_channel(update: Update) -> Tuple[bool, Optional[UserCh
     return is_created, user_channel
 
 
-async def is_plan_limit_reached(update: Update, user_channel: UserChannel) -> None:
+async def is_plan_limit_reached(update: Update, user_channel: UserChannel) -> bool:
     user_plan = UserPlan(user_id=user_channel.user_id, channel_id=user_channel.id)
 
     if user_plan.is_plan_limit_reached():
@@ -54,4 +54,5 @@ async def is_plan_limit_reached(update: Update, user_channel: UserChannel) -> No
                     ]
                 ),
             )
-        return
+        return True
+    return False

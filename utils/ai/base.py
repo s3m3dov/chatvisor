@@ -6,7 +6,7 @@ from langchain.callbacks import get_openai_callback
 from langchain.chat_models import ChatOpenAI
 from langchain.memory import (
     ConversationSummaryBufferMemory,
-    ChatMessageHistory,
+    ChatMessageHistory, ConversationBufferWindowMemory,
 )
 from langchain.memory.chat_memory import BaseChatMemory
 from langchain.prompts import PromptTemplate
@@ -48,10 +48,9 @@ class BaseChatAgent:
         if not messages:
             return None
         logger.debug("Messages: %s", messages)
-        memory = ConversationSummaryBufferMemory(
-            llm=self.llm,
+        memory = ConversationBufferWindowMemory(
             chat_memory=ChatMessageHistory(messages=messages),
-            max_token_limit=650,
+            k=self.llm_config.buffer_size,
         )
         return memory
 

@@ -62,6 +62,7 @@ class LLMConfig(BaseModel):
     name: SystemUser
     temperature: float = 0.3
     max_tokens: int = 300
+    buffer_size: int = 5
 
 
 class ImageGenConfig(BaseModel):

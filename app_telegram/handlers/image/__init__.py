@@ -20,33 +20,35 @@ async def ask_dalle(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     text = " ".join(context.args)
     is_created, user_channel = get_or_create_user_tg_channel(update)
-    await is_plan_limit_reached(update, user_channel)
 
-    await update.message.reply_text("Generating...")
+    is_limit_reached = await is_plan_limit_reached(update, user_channel)
 
-    dalle_conf = settings.dalle
-    prompt_message = PromptMessage.create(
-        text=text,
-        sender_id=user_channel.user_id,
-        receiver_id=dalle_conf.name,
-        channel_id=user_channel.id,
-        prompt_tokens=0,
-        completion_tokens=0,
-        cost=dalle_conf.price,
-    )
-    response = openai.Image.create(
-        prompt=text,
-        api_key=settings.openapi_key,
-        n=1,
-        size=settings.dalle.resolution
-    )
-    image_url = response['data'][0]['url']
-    await context.bot.send_photo(
-        chat_id=update.effective_chat.id,
-        photo=image_url,
-        caption=text,
-    )
-    OutputMessage.create(
-        text=image_url,
-        prompt_id=prompt_message.id,
-    )
+    if not is_limit_reached:
+        await update.message.reply_text("Generating...")
+
+        dalle_conf = settings.dalle
+        prompt_message = PromptMessage.create(
+            text=text,
+            sender_id=user_channel.user_id,
+            receiver_id=dalle_conf.name,
+            channel_id=user_channel.id,
+            prompt_tokens=0,
+            completion_tokens=0,
+            cost=dalle_conf.price,
+        )
+        response = openai.Image.create(
+            prompt=text,
+            api_key=settings.openapi_key,
+            n=1,
+            size=settings.dalle.resolution
+        )
+        image_url = response['data'][0]['url']
+        await context.bot.send_photo(
+            chat_id=update.effective_chat.id,
+            photo=image_url,
+            caption=text,
+        )
+        OutputMessage.create(
+            text=image_url,
+            prompt_id=prompt_message.id,
+        )

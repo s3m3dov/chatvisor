@@ -68,9 +68,9 @@ class UserPlan:
         usage = self.get_daily_usage()
         result = usage >= self.plan.limit_amount
         logger.info(
-            f"Usage: {usage}, user: {self.user_id}, channel: {self.channel_id}, plan: {self.plan.name}, "
-            f"duration: {self.plan.limit_duration},  limit: {self.plan.limit_amount}, "
-            f"result: {result}"
+            "Usage: %s, user: %s, channel: %s, plan: %s, duration: %s, limit: %s, result: %s",
+            usage, self.user_id, self.channel_id, self.plan.name, self.plan.limit_duration,
+            self.plan.limit_amount, result
         )
         return result
 
@@ -78,9 +78,9 @@ class UserPlan:
         usage = self.get_lifetime_usage()
         result = usage >= self.plan.limit_amount
         logger.info(
-            f"Usage: {usage}, user: {self.user_id}, channel: {self.channel_id}, plan: {self.plan.name}, "
-            f"duration: {self.plan.limit_duration},  limit: {self.plan.limit_amount}, "
-            f"result: {result}"
+            "Usage: %s, user: %s, channel: %s, plan: %s, duration: %s, limit: %s, result: %s",
+            usage, self.user_id, self.channel_id, self.plan.name, self.plan.limit_duration,
+            self.plan.limit_amount, result
         )
         return result
 

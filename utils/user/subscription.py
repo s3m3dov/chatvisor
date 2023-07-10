@@ -17,7 +17,9 @@ class SubscriptionCRUD:
     @staticmethod
     def create_subscription(subscription: SubscriptionSchema):
         user = User.where(customer_id__exact=subscription.customer).first()
-        logger.debug(f"user: {user}")
+        if not user:
+            logger.error(f"User not found: {subscription.customer}")
+            return
 
         SubscriptionModel.create(
             id=subscription.id,

@@ -10,7 +10,9 @@ from core.config import settings
 from core.logging import logger
 
 
-async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def error_handler(
+    update: object, context: ContextTypes.DEFAULT_TYPE
+) -> None:
     """Log the error and send a telegram message to notify the developer."""
     tb_list = traceback.format_exception(
         None, context.error, context.error.__traceback__
@@ -20,7 +22,9 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> N
 
     # Build the message with some markup and additional information about what happened.
     # You might need to add some logic to deal with messages longer than the 4096-character limit.
-    update_str = update.to_dict() if isinstance(update, Update) else str(update)
+    update_str = (
+        update.to_dict() if isinstance(update, Update) else str(update)
+    )
     message = (
         f"An exception was raised while handling an update\n"
         f"<pre>update = {html.escape(json.dumps(update_str, indent=2, ensure_ascii=False))}"
@@ -38,6 +42,8 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> N
     )
 
 
-async def bad_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def bad_command(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> None:
     """Raise an error to trigger the error handler."""
     await context.bot.wrong_method_name()  # type: ignore[attr-defined]

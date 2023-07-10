@@ -9,6 +9,7 @@ from stripe.error import SignatureVerificationError
 from core.config import settings
 from core.logging import logger
 from entities.schemas import Customer, CustomerSubscription, Invoice
+from utils.notification import send_telegram_message
 from utils.user.main import UserCRUD
 from utils.user.subscription import SubscriptionCRUD
 
@@ -29,19 +30,21 @@ async def post_stripe_webhook(request: Request):
     except ValueError as exc:
         logger.error(f"Error while decoding event! {exc}", exc_info=exc)
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Error while decoding event"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Error while decoding event",
         )
     except SignatureVerificationError as exc:
         logger.error(f"Invalid signature! {exc}", exc_info=exc)
         # Invalid signature
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Signature"
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid Signature",
         )
     except Exception as exc:
         logger.error(f"Unhandled exception: {exc}", exc_info=exc)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Unhandled Exception"
+            detail="Unhandled Exception",
         )
 
     # Handle the event
@@ -57,18 +60,27 @@ async def post_stripe_webhook(request: Request):
             subscription = CustomerSubscription(**_subscription)
             logger.info(f"Customer subscription created: {subscription}")
             SubscriptionCRUD.create_subscription(subscription=subscription)
+            await send_telegram_message(
+                subscription.customer, "Your subscription has been created!"
+            )
 
         case "customer.subscription.updated":
             _subscription = event.data.object
             subscription = CustomerSubscription(**_subscription)
             logger.info(f"Customer subscription updated: {subscription}")
             SubscriptionCRUD.update_subscription(subscription=subscription)
+            await send_telegram_message(
+                subscription.customer, "Your subscription is updated!"
+            )
 
         case "customer.subscription.deleted":
             _subscription = event.data.object
             subscription = CustomerSubscription(**_subscription)
             logger.info(f"Customer subscription cancelled: {subscription}")
             SubscriptionCRUD.update_subscription(subscription=subscription)
+            await send_telegram_message(
+                subscription.customer, "Your subscription is cancelled!"
+            )
 
         case "invoice.paid":
             _invoice = event.data.object

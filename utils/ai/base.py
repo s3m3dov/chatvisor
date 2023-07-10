@@ -45,8 +45,6 @@ class BaseChatAgent:
     def _init_memory(
         self, messages: Optional[List[BaseMessage]]
     ) -> Optional[BaseChatMemory]:
-        if not messages:
-            return None
         logger.debug("Messages: %s", messages)
         memory = ConversationBufferWindowMemory(
             chat_memory=ChatMessageHistory(messages=messages),

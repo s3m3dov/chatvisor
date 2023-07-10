@@ -31,7 +31,7 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> N
     )
 
     # Finally, send the message
-    await context.bot.send_message(
+    await context.bot.send_telegram_message(
         chat_id=settings.telegram.developer_chat_id,
         text=message,
         parse_mode=ParseMode.HTML,

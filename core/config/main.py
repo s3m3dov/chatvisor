@@ -46,8 +46,8 @@ class Config(BaseSettings):
     )
     premium_plan: PlanConfig = PlanConfig(
         name=Plan.PREMIUM,
-        limit_amount=1,
-        limit_duration=PlanLimitDuration.DAILY,
+        limit_amount=8,
+        limit_duration=PlanLimitDuration.MONTHLY,
     )
     slack: SlackConfig = SlackConfig(
         token=env("SLACK_TOKEN"),

@@ -9,13 +9,8 @@ from core.config.submodels.main import PlanConfig
 from core.database import session_scope
 from core.logging import logger
 from entities.enums import SubscriptionStatus, PlanLimitDuration
-from entities.models import CustomerSubscription, PromptMessage
-from entities.models import (
-    User,
-)
-from entities.schemas import (
-    CheckoutSession,
-)
+from entities.models import User, CustomerSubscription, PromptMessage
+from entities.schemas import CheckoutSession
 
 __all__ = ["UserPlan"]
 stripe.api_key = settings.stripe.api_secret_key
@@ -56,31 +51,28 @@ class UserPlan:
     def is_plan_limit_reached(self) -> bool:
         match self.plan.limit_duration:
             case PlanLimitDuration.DAILY:
-                return self.is_day_limit_reached()
+                usage = self.get_daily_usage()
+                return self.is_limit_reached(usage)
             case PlanLimitDuration.MONTHLY:
-                raise NotImplementedError
+                usage = self.get_monthly_usage()
+                return self.is_limit_reached(usage)
             case PlanLimitDuration.LIFETIME:
-                return self.is_lifetime_limit_reached()
+                usage = self.get_lifetime_usage()
+                return self.is_limit_reached(usage)
             case other:
-                logger.warning(f"Unknown plan limit duration: {other}")
+                logger.error(f"Unknown plan limit duration: {other}")
 
-    def is_day_limit_reached(self) -> bool:
-        usage = self.get_daily_usage()
+    def is_limit_reached(self, usage: float) -> bool:
         result = usage >= self.plan.limit_amount
         logger.info(
             "Usage: %s, user: %s, channel: %s, plan: %s, duration: %s, limit: %s, result: %s",
-            usage, self.user_id, self.channel_id, self.plan.name, self.plan.limit_duration,
-            self.plan.limit_amount, result
-        )
-        return result
-
-    def is_lifetime_limit_reached(self) -> bool:
-        usage = self.get_lifetime_usage()
-        result = usage >= self.plan.limit_amount
-        logger.info(
-            "Usage: %s, user: %s, channel: %s, plan: %s, duration: %s, limit: %s, result: %s",
-            usage, self.user_id, self.channel_id, self.plan.name, self.plan.limit_duration,
-            self.plan.limit_amount, result
+            usage,
+            self.user_id,
+            self.channel_id,
+            self.plan.name,
+            self.plan.limit_duration,
+            self.plan.limit_amount,
+            result,
         )
         return result
 
@@ -97,6 +89,19 @@ class UserPlan:
             )
         return usage or 0
 
+    def get_monthly_usage(self) -> float:
+        earlier_by_30d = pendulum.now("UTC").subtract(days=30).int_timestamp
+        with session_scope() as session:
+            usage = (
+                session.query(func.sum(PromptMessage.cost).label("usage"))
+                .filter(
+                    PromptMessage.channel_id == self.channel_id,
+                    PromptMessage.created_at >= earlier_by_30d,
+                )
+                .scalar()
+            )
+        return usage or 0
+
     def get_lifetime_usage(self) -> float:
         with session_scope() as session:
             usage = (
@@ -108,7 +113,7 @@ class UserPlan:
         return usage or 0
 
     def create_checkout_session(
-        self, user: User
+            self, user: User
     ) -> Tuple[bool, Optional[CheckoutSession]]:
         """Get an employee.
         Args:

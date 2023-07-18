@@ -2,7 +2,6 @@ import uuid
 from typing import Optional, List
 
 import pendulum
-from pgvector.sqlalchemy import Vector
 from sqlalchemy import Integer, String, Boolean, JSON, ForeignKey, UUID, Float
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy.types import Enum as saEnum
@@ -19,7 +18,12 @@ class User(BaseModel):
     customer_id: Mapped[str] = mapped_column(
         String, nullable=False
     )  # Customer ID in Stripe
-
+    first_name: Mapped[str] = mapped_column(String, nullable=False)
+    last_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    full_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    email: Mapped[str] = mapped_column(String, nullable=True)
+    phone: Mapped[str] = mapped_column(String, nullable=True)
+    meta_data: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
     created_at: Mapped[int] = mapped_column(
         Integer, nullable=False, default=pendulum.now("UTC").int_timestamp
     )
@@ -29,15 +33,7 @@ class User(BaseModel):
         default=pendulum.now("UTC").int_timestamp,
         onupdate=pendulum.now("UTC").int_timestamp,
     )
-
-    first_name: Mapped[str] = mapped_column(String, nullable=False)
-    last_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    full_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-
-    email: Mapped[str] = mapped_column(String, nullable=True)
-    phone: Mapped[str] = mapped_column(String, nullable=True)
-    meta_data: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
-
+    # Relationships
     channels: Mapped[List["UserChannel"]] = relationship(back_populates="user")
     prompts: Mapped[List["PromptMessage"]] = relationship(back_populates="sender")
     customer_subscriptions: Mapped[List["CustomerSubscription"]] = relationship(
@@ -52,16 +48,24 @@ class UserChannel(BaseModel):
     id: Mapped[Optional[int]] = mapped_column(
         Integer, primary_key=True, nullable=False, autoincrement=True
     )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(User.id), nullable=False
+    )
     platform: Mapped[Platform] = mapped_column(
         saEnum(Platform, name="platform"), nullable=False
     )
     platform_user_id: Mapped[int] = mapped_column(Integer, nullable=False)
     data: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
-
-    user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID, ForeignKey(User.id), nullable=False
+    created_at: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=pendulum.now("UTC").int_timestamp
     )
-
+    updated_at: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=pendulum.now("UTC").int_timestamp,
+        onupdate=pendulum.now("UTC").int_timestamp,
+    )
+    # Relationships
     user: Mapped["User"] = relationship(back_populates="channels")
     prompts: Mapped[List["PromptMessage"]] = relationship(back_populates="channel")
 
@@ -82,10 +86,6 @@ class PromptMessage(BaseModel):
     cost: Mapped[Optional[float]] = mapped_column(
         Float(precision=8), nullable=False
     )  # in USD
-    # openai_embedding: Mapped[Optional[Vector]] = mapped_column(Vector, nullable=True)
-    created_at: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=pendulum.now("UTC").int_timestamp
-    )
 
     channel_id: Mapped[int] = mapped_column(
         Integer, ForeignKey(UserChannel.id), nullable=False
@@ -96,7 +96,10 @@ class PromptMessage(BaseModel):
     receiver_id: Mapped[SystemUser] = mapped_column(
         saEnum(SystemUser, name="system_user"), nullable=False
     )
-
+    created_at: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=pendulum.now("UTC").int_timestamp
+    )
+    # Relationships
     channel: Mapped["UserChannel"] = relationship(back_populates="prompts")
     sender: Mapped["User"] = relationship(back_populates="prompts")
     output: Mapped["OutputMessage"] = relationship(back_populates="prompt")
@@ -109,16 +112,14 @@ class OutputMessage(BaseModel):
     id: Mapped[Optional[int]] = mapped_column(
         Integer, primary_key=True, nullable=False, autoincrement=True
     )
-    text: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    # openai_embedding: Mapped[Optional[Vector]] = mapped_column(Vector, nullable=True)
-    created_at: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=pendulum.now("UTC").int_timestamp
-    )
-
     prompt_id: Mapped[int] = mapped_column(
         Integer, ForeignKey(PromptMessage.id), nullable=False
     )
-
+    text: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    created_at: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=pendulum.now("UTC").int_timestamp
+    )
+    # Relationships
     prompt: Mapped["PromptMessage"] = relationship(back_populates="output")
 
 
@@ -132,22 +133,18 @@ class CustomerSubscription(BaseModel):
     __repr_attrs__ = ["id", "status"]
 
     id: Mapped[str] = mapped_column(String, primary_key=True, nullable=False)
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(User.id), nullable=True)
     status: Mapped[str] = mapped_column(String, nullable=False)
-    created_at: Mapped[int] = mapped_column(
-        Integer, nullable=False
-    )  # Customer `created_at` in Stripe
+    current_period_start: Mapped[int] = mapped_column(Integer, nullable=False)
+    current_period_end: Mapped[int] = mapped_column(Integer, nullable=False)
+    cancel_at_period_end: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    cancel_at: Mapped[int] = mapped_column(Integer, nullable=True)
+    created_at: Mapped[int] = mapped_column(Integer, nullable=False)
     updated_at: Mapped[int] = mapped_column(
         Integer,
         nullable=False,
         default=pendulum.now("UTC").int_timestamp,
         onupdate=pendulum.now("UTC").int_timestamp,
     )
-
-    current_period_start: Mapped[int] = mapped_column(Integer, nullable=False)
-    current_period_end: Mapped[int] = mapped_column(Integer, nullable=False)
-    cancel_at_period_end: Mapped[bool] = mapped_column(Boolean, nullable=False)
-    cancel_at: Mapped[int] = mapped_column(Integer, nullable=True)
-
-    user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(User.id), nullable=True)
-
+    # Relationships
     user: Mapped["User"] = relationship(back_populates="customer_subscriptions")

@@ -131,6 +131,13 @@ class UserPlan:
 
     @staticmethod
     def _create_checkout_session(user: User) -> CheckoutSession:
+        if settings.stripe.trial_period_days:
+            subscription_data = {
+                "trial_settings": {"end_behavior": {"missing_payment_method": "pause"}},
+                "trial_period_days": settings.stripe.trial_period_days,
+            }
+        else:
+            subscription_data = {}
         _session: stripe.checkout.Session = stripe.checkout.Session.create(
             customer=user.customer_id,
             metadata={"user_id": user.id},
@@ -144,9 +151,6 @@ class UserPlan:
             line_items=[
                 {"price": settings.stripe.price_id, "quantity": 1},
             ],
-            subscription_data={
-                "trial_settings": {"end_behavior": {"missing_payment_method": "pause"}},
-                "trial_period_days": settings.stripe.trial_period_days,
-            },
+            subscription_data=subscription_data,
         )
         return CheckoutSession(**_session)

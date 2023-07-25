@@ -2,6 +2,7 @@ import uuid
 from typing import Optional, Tuple
 from typing import Union
 
+import pendulum
 import stripe
 
 from core.config import settings
@@ -49,12 +50,16 @@ class UserCRUD:
             meta_data=customer.metadata,
             email=customer.email,
             phone=customer.phone,
+            created_at=pendulum.now("UTC").int_timestamp,
+            updated_at=pendulum.now("UTC").int_timestamp,
         )
         user_channel = UserChannel.create(
             platform=platform,
             platform_user_id=data.id,
             user_id=user.id,
             data=data.optional_data.dict(),
+            created_at=pendulum.now("UTC").int_timestamp,
+            updated_at=pendulum.now("UTC").int_timestamp,
         )
         return user_channel
 
@@ -69,6 +74,7 @@ class UserCRUD:
             email=customer.email,
             phone=customer.phone,
             full_name=customer.name,
+            updated_at=pendulum.now("UTC").int_timestamp,
         )
         user.save()
         return user

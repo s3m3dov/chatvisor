@@ -1,5 +1,7 @@
+from datetime import datetime
 from typing import List
 
+import pendulum
 from langchain.schema import BaseMessage, HumanMessage, AIMessage
 
 from core.config import settings
@@ -52,6 +54,7 @@ class ChatBotOpenAI:
             prompt_tokens=prompt_tokens,
             completion_tokens=completion_tokens,
             cost=cost,
+            created_at=pendulum.now("UTC").int_timestamp,
         )
         logger.info(f"PromptMessage created: {prompt_message}")
         return prompt_message
@@ -61,6 +64,7 @@ class ChatBotOpenAI:
         OutputMessage.create(
             text=output,
             prompt_id=prompt_message.id,
+            created_at=pendulum.now("UTC").int_timestamp,
         )
 
     def get_chat_history(self) -> List[BaseMessage]:

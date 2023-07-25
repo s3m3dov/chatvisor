@@ -1,4 +1,5 @@
 import openai
+import pendulum
 from telegram import Update
 from telegram.ext import ContextTypes
 
@@ -35,6 +36,7 @@ async def ask_dalle(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             prompt_tokens=0,
             completion_tokens=0,
             cost=dalle_conf.price,
+            created_at=pendulum.now("UTC").int_timestamp,
         )
         response = openai.Image.create(
             prompt=text,
@@ -51,4 +53,5 @@ async def ask_dalle(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         OutputMessage.create(
             text=image_url,
             prompt_id=prompt_message.id,
+            created_at=pendulum.now("UTC").int_timestamp,
         )

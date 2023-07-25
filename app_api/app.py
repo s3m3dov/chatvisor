@@ -59,28 +59,27 @@ async def post_stripe_webhook(request: Request):
             _subscription = event.data.object
             subscription = CustomerSubscription(**_subscription)
             logger.info(f"Customer subscription created: {subscription}")
+            customer_id = subscription.customer
             SubscriptionCRUD.create_subscription(subscription=subscription)
             await send_telegram_message(
-                subscription.customer, "Your subscription has been created!"
+                customer_id, "Your subscription has been created!"
             )
 
         case "customer.subscription.updated":
             _subscription = event.data.object
             subscription = CustomerSubscription(**_subscription)
             logger.info(f"Customer subscription updated: {subscription}")
+            customer_id = subscription.customer
             SubscriptionCRUD.update_subscription(subscription=subscription)
-            await send_telegram_message(
-                subscription.customer, "Your subscription is updated!"
-            )
+            await send_telegram_message(customer_id, "Your subscription is updated!")
 
         case "customer.subscription.deleted":
             _subscription = event.data.object
             subscription = CustomerSubscription(**_subscription)
             logger.info(f"Customer subscription cancelled: {subscription}")
+            customer_id = subscription.customer
             SubscriptionCRUD.update_subscription(subscription=subscription)
-            await send_telegram_message(
-                subscription.customer, "Your subscription is cancelled!"
-            )
+            await send_telegram_message(customer_id, "Your subscription is cancelled!")
 
         case "invoice.paid":
             _invoice = event.data.object

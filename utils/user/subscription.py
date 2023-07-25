@@ -34,15 +34,16 @@ class SubscriptionCRUD:
 
     @classmethod
     def update_subscription(cls, subscription: SubscriptionSchema):
-        subscription_model = SubscriptionModel.find(subscription.id)
-        if not subscription_model:
-            cls.create_subscription(subscription)
 
-        subscription_model.update(
-            status=subscription.status,
-            current_period_start=subscription.current_period_start,
-            current_period_end=subscription.current_period_end,
-            cancel_at_period_end=subscription.cancel_at_period_end,
-            cancel_at=subscription.cancel_at,
+        subscription_model = SubscriptionModel.where(id__exact=subscription.id,).update(
+            values=dict(
+                status=subscription.status,
+                current_period_start=subscription.current_period_start,
+                current_period_end=subscription.current_period_end,
+                cancel_at_period_end=subscription.cancel_at_period_end,
+                cancel_at=subscription.cancel_at,
+            ),
         )
-        subscription_model.save()
+        if not subscription_model:
+            logger.error(f"Subscription not found: {subscription.id}")
+            cls.create_subscription(subscription)
